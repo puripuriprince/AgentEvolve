@@ -1,0 +1,101 @@
+<NAME>
+adaptive_early_stopping_and_per_circle_shrink
+</NAME>
+
+<DESCRIPTION>
+Implement early stopping in the adaptive local optimization loop when the total overlap is below a threshold or improvement in sum of radii is negligible. Also introduce adaptive per-circle shrink factors to shrink circles more aggressively if they are involved in overlaps, and less otherwise. This aims to speed convergence and better resolve conflicts, potentially improving overall packing density.
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+    # 6. Adaptive local optimization
+    for it in range(adaptive_iters):
+        # Recompute radii to maximize size without overlap or boundary violation
+        radii = compute_max_radii(centers)
+        # Nudge centers away from overlaps and boundaries
+        for i in range(n):
+            grad = np.zeros(2)
+            # Boundary repulsion
+            for d in range(2):
+                if centers[i, d] - radii[i] < 0.0:
+                    grad[d] += (0.01 - (centers[i, d] - radii[i])) * 0.5
+                if centers[i, d] + radii[i] > 1.0:
+                    grad[d] -= ((centers[i, d] + radii[i]) - 0.99) * 0.5
+            # Overlap repulsion
+            for j in range(n):
+                if i == j:
+                    continue
+                dist = np.linalg.norm(centers[i] - centers[j])
+                min_dist = radii[i] + radii[j]
+                if dist < min_dist - 1e-6:
+                    if dist > 1e-8:
+                        grad += (centers[i] - centers[j]) / dist * (min_dist - dist) * 0.15
+                    else:
+                        grad += np.random.uniform(-1, 1, 2) * 0.01
+            # Apply small step
+            centers[i] += grad * 0.25
+        # Clip to square
+        centers = np.clip(centers, 0.01, 0.99)
+        # If overlaps persist, shrink radii slightly
+        for i in range(n):
+            for j in range(i+1, n):
+                dist = np.linalg.norm(centers[i] - centers[j])
+                if dist < radii[i] + radii[j] - 1e-6:
+                    radii[i] *= shrink_factor
+                    radii[j] *= shrink_factor
+=======
+    # 6. Adaptive local optimization
+    prev_sum = 0.0
+    for it in range(adaptive_iters):
+        # Recompute radii to maximize size without overlap or boundary violation
+        radii = compute_max_radii(centers)
+        curr_sum = np.sum(radii)
+
+        # Early stopping if improvement is negligible
+        if abs(curr_sum - prev_sum) < 1e-5:
+            break
+        prev_sum = curr_sum
+
+        # Calculate total overlap to consider early stopping
+        total_overlap = 0.0
+        for i in range(n):
+            for j in range(i+1, n):
+                dist = np.linalg.norm(centers[i] - centers[j])
+                overlap = max(0.0, radii[i] + radii[j] - dist)
+                total_overlap += overlap
+        if total_overlap < 1e-4:
+            break
+
+        # Nudge centers away from overlaps and boundaries
+        overlaps_per_circle = np.zeros(n)
+        for i in range(n):
+            grad = np.zeros(2)
+            # Boundary repulsion
+            for d in range(2):
+                if centers[i, d] - radii[i] < 0.0:
+                    grad[d] += (0.01 - (centers[i, d] - radii[i])) * 0.5
+                if centers[i, d] + radii[i] > 1.0:
+                    grad[d] -= ((centers[i, d] + radii[i]) - 0.99) * 0.5
+            # Overlap repulsion
+            for j in range(n):
+                if i == j:
+                    continue
+                dist = np.linalg.norm(centers[i] - centers[j])
+                min_dist = radii[i] + radii[j]
+                if dist < min_dist - 1e-6:
+                    overlaps_per_circle[i] += 1
+                    if dist > 1e-8:
+                        grad += (centers[i] - centers[j]) / dist * (min_dist - dist) * 0.15
+                    else:
+                        grad += np.random.uniform(-1, 1, 2) * 0.01
+            # Apply small step
+            centers[i] += grad * 0.25
+        # Clip to square
+        centers = np.clip(centers, 0.01, 0.99)
+
+        # Adaptive per-circle shrink factor based on overlaps count
+        for i in range(n):
+            if overlaps_per_circle[i] > 0:
+                factor = shrink_factor ** overlaps_per_circle[i]
+                radii[i] *= factor
+>>>>>>> REPLACE

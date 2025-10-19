@@ -1,0 +1,93 @@
+<NAME>
+corner_edge_circles_larger_center_bias
+</NAME>
+
+<DESCRIPTION>
+The current approach places one large central circle, two rings (8 inner, 16 outer) symmetrically, then clips to the square, and then shrinks overlapping radii. This leads to many circles being "squashed" at the edges and corners, wasting space because the outer ring is uniformly spaced (even where the corner area could fit a larger circle).
+
+A better approach, inspired by densest known packings for moderate n, is to place 4 circles at the corners (near but not exactly at the corners, so their centers are inside and can be as large as possible), 8 along the edges (not at corners), and the remaining 14 in a central "hexagonally" biased arrangement (a central circle and two inner rings of 6 and 7, slightly compacted toward the center).
+
+This hybrid arrangement allows for bigger circles at the corners and larger central circles. The edge and corner placements are chosen to maximize their radius (placing the center at a distance r from both adjacent walls, so r=max allowed by non-overlap with neighbors). The inner 14 are packed as tightly as possible.
+
+This approach gives more room for large circles at the edges/corners and reduces excessive clipping. This arrangement is commonly used in "best known" packings for n=26 as in the literature. The positions are chosen so that after radii adjustment, the sum is higher.
+
+The code below changes the way centers are initialized in construct_packing. The rest of the code (radii calculation and clipping) remains the same.
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+    # Initialize arrays for 26 circles
+    n = 26
+    centers = np.zeros((n, 2))
+
+    # Place circles in a structured pattern
+    # This is a simple pattern - evolution will improve this
+
+    # First, place a large circle in the center
+    centers[0] = [0.5, 0.5]
+
+    # Place 8 circles around it in a ring
+    for i in range(8):
+        angle = 2 * np.pi * i / 8
+        centers[i + 1] = [0.5 + 0.3 * np.cos(angle), 0.5 + 0.3 * np.sin(angle)]
+
+    # Place 16 more circles in an outer ring
+    for i in range(16):
+        angle = 2 * np.pi * i / 16
+        centers[i + 9] = [0.5 + 0.7 * np.cos(angle), 0.5 + 0.7 * np.sin(angle)]
+
+    # Additional positioning adjustment to make sure all circles
+    # are inside the square and don't overlap
+    # Clip to ensure everything is inside the unit square
+    centers = np.clip(centers, 0.01, 0.99)
+=======
+    # Initialize arrays for 26 circles
+    n = 26
+    centers = np.zeros((n, 2))
+
+    # Hybrid arrangement: 4 at corners, 8 at edges, 14 in two inner rings + center
+
+    # 0: Central circle
+    centers[0] = [0.5, 0.5]
+
+    # 1-4: Corners (with slight inset to maximize radius)
+    inset = 0.12
+    centers[1] = [inset, inset]
+    centers[2] = [1 - inset, inset]
+    centers[3] = [1 - inset, 1 - inset]
+    centers[4] = [inset, 1 - inset]
+
+    # 5-12: Edge centers (not at corners, inset from borders)
+    edge_inset = 0.11
+    between = 0.5
+    # Left edge: vertical
+    centers[5] = [edge_inset, between]
+    # Right edge
+    centers[6] = [1 - edge_inset, between]
+    # Bottom edge
+    centers[7] = [between, edge_inset]
+    # Top edge
+    centers[8] = [between, 1 - edge_inset]
+    # Edge quads between corners and centers
+    centers[9]  = [edge_inset, edge_inset + (between - edge_inset) * 0.5]
+    centers[10] = [edge_inset + (between - edge_inset) * 0.5, edge_inset]
+    centers[11] = [1 - edge_inset, edge_inset + (between - edge_inset) * 0.5]
+    centers[12] = [1 - edge_inset - (between - edge_inset) * 0.5, edge_inset]
+
+    # 13-25: Two inner rings in a gently hexagonal arrangement
+    # First inner ring (radius r1 from center, 6 circles)
+    r1 = 0.23
+    for k in range(6):
+        theta = 2 * np.pi * k / 6
+        centers[13 + k] = [0.5 + r1 * np.cos(theta), 0.5 + r1 * np.sin(theta)]
+    # Second inner ring (radius r2 from center, 7 circles, slightly rotated)
+    r2 = 0.36
+    for k in range(7):
+        theta = 2 * np.pi * k / 7 + np.pi / 10
+        centers[19 + k] = [0.5 + r2 * np.cos(theta), 0.5 + r2 * np.sin(theta)]
+
+    # Clip to ensure everything is inside the unit square
+    centers = np.clip(centers, 0.01, 0.99)
+>>>>>>> REPLACE
+
+</DIFF>

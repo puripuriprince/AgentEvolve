@@ -1,0 +1,106 @@
+# EVOLVE-BLOCK-START
+"""Enhanced hybrid circle packing for n=26 circles"""
+
+import numpy as np
+
+def construct_packing():
+    """
+    Construct a strategic arrangement of 26 circles in a unit square
+    with variable radii to maximize total sum of radii.
+    """
+    n = 26
+    centers = np.zeros((n, 2))
+    radii = np.zeros(n)
+
+    # Place large circle at center
+    centers[0] = [0.5, 0.5]
+
+    # Place 4 large corner circles
+    corner_positions = np.array([
+        [0.1, 0.1],
+        [0.9, 0.1],
+        [0.9, 0.9],
+        [0.1, 0.9]
+    ])
+    centers[1:5] = corner_positions
+
+    # Fill remaining 21 circles in a grid pattern
+    grid_x = np.linspace(0.2, 0.8, 3)
+    grid_y = np.linspace(0.2, 0.8, 3)
+    grid_points = np.array([(x, y) for x in grid_x for y in grid_y])
+    # Remove center point to avoid overlap with large center circle
+    grid_points = np.delete(grid_points, 4, axis=0)
+    centers[5:5+len(grid_points)] = grid_points
+
+    # Initialize radii based on proximity to borders and centers
+    radii = compute_max_radii(centers)
+
+    # Local optimization: adjust radii to maximize sum without overlaps
+    radii = optimize_radii(centers, radii)
+
+    sum_of_radii = np.sum(radii)
+    return centers, radii, sum_of_radii
+
+def compute_max_radii(centers):
+    """
+    Compute initial maximum radii based on distance to borders and neighboring circles.
+    """
+    n = centers.shape[0]
+    radii = np.full(n, 0.1)  # start with small radii
+
+    # Limit by distance to borders
+    for i in range(n):
+        x, y = centers[i]
+        radii[i] = min(x, y, 1 - x, 1 - y, radii[i])
+
+    # Limit by distance to other circles
+    for i in range(n):
+        for j in range(i + 1, n):
+            dist = np.linalg.norm(centers[i] - centers[j])
+            if dist < 1e-8:
+                continue
+            max_radius = dist / 2
+            radii[i] = min(radii[i], max_radius)
+            radii[j] = min(radii[j], max_radius)
+    return radii
+
+def optimize_radii(centers, radii, iterations=50):
+    """
+    Iteratively adjust radii to maximize total sum while avoiding overlaps.
+    """
+    n = len(radii)
+    for _ in range(iterations):
+        for i in range(n):
+            # Limit by borders
+            x, y = centers[i]
+            max_border_radius = min(x, y, 1 - x, 1 - y)
+            radii[i] = min(radii[i], max_border_radius)
+
+        # Limit by neighboring circles
+        for i in range(n):
+            for j in range(i + 1, n):
+                dist = np.linalg.norm(centers[i] - centers[j])
+                if dist < 1e-8:
+                    continue
+                max_radius = dist / 2
+                if radii[i] + radii[j] > dist:
+                    # Scale down both radii proportionally
+                    scale = max_radius / (radii[i] + radii[j])
+                    radii[i] *= scale
+                    radii[j] *= scale
+        # Optional: slightly increase radii to improve total sum
+        radii *= 1.01
+        # Clip to non-negative
+        radii = np.clip(radii, 0, None)
+    return radii
+
+# EVOLVE-BLOCK-END
+
+
+# This part remains fixed (not evolved)
+def run_packing():
+    """Run the circle packing constructor for n=26"""
+    centers, radii = construct_packing()
+    # Calculate the sum of radii
+    sum_radii = np.sum(radii)
+    return centers, radii, sum_radii

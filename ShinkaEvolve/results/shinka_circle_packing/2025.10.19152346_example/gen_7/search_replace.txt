@@ -1,0 +1,65 @@
+<NAME>
+dynamic_initial_radii
+</NAME>
+
+<DESCRIPTION>
+Insert a computation of initial radii based on local spacing immediately before symmetry-breaking perturbations, replacing hardcoded radii for better adaptive starting values.
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+    # 5. Small random perturbations to break symmetry
+=======
+    # Compute adaptive initial radii based on spacing
+    initial_shrink = 0.9
+    radii = compute_max_radii(centers) * initial_shrink
+
+    # 5. Small random perturbations to break symmetry
+>>>>>>> REPLACE
+</DIFF>
+
+<NAME>
+expand_center_hex
+</NAME>
+
+<DESCRIPTION>
+Increase offsets in the central hex pattern to allow larger central packing, improving density by leveraging stronger hexagonal spacing.
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+    center_hex = [
+        [0.5, 0.5],
+        [0.5+0.13, 0.5],
+        [0.5-0.13, 0.5],
+        [0.5, 0.5+0.13],
+        [0.5, 0.5-0.13],
+        [0.5+0.09, 0.5+0.09]
+    ]
+=======
+    center_hex = [
+        [0.5, 0.5],
+        [0.5+0.14, 0.5],
+        [0.5-0.14, 0.5],
+        [0.5, 0.5+0.14],
+        [0.5, 0.5-0.14],
+        [0.5+0.095, 0.5+0.095]
+    ]
+>>>>>>> REPLACE
+</DIFF>
+
+<NAME>
+expand_inner_ring
+</NAME>
+
+<DESCRIPTION>
+Move the inner ring outward to r=0.33 for better utilization of mid-region space, balancing edge and center densities.
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+    ring_r = 0.28
+=======
+    ring_r = 0.33
+>>>>>>> REPLACE
+</DIFF>

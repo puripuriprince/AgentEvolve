@@ -1,0 +1,224 @@
+<NAME>
+edge_priority_and_anneal_shake
+</NAME>
+
+<DESCRIPTION>
+To further optimize the sum of radii, we combine two strategies:
+1. **Edge/Corners Priority**: Place more circles directly at or near the square corners and edge midpoints. These locations can often accommodate slightly larger circles without interfering with the dense core, exploiting the geometry of the square.
+2. **Simulated Annealing "Shake"**: During the relaxation phase, introduce a decaying random noise (annealing) to help escape local minima and allow the system to settle into a better global optimum. This is especially effective after a few iterations of standard relaxation.
+
+We implement this as follows:
+- Adjust the initial placement: 4 corners and 4 edge midpoints are assigned to circles. The rest are distributed in the rings/core.
+- In the relaxation (`local_relax_and_grow`), add a decaying random displacement to each movable center, proportional to the annealing temperature, which linearly decreases with each step. This helps break symmetry and allows the circles to escape poor local configurations.
+These changes should allow larger circles at the periphery and improve compaction throughout.
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+    # 1. Central hexagon: 7 circles (center + 6 around)
+    core_r = 0.150
+    centers[0] = [0.5, 0.5]
+    for i in range(6):
+        a = np.pi/6 + i * np.pi/3
+        centers[1+i] = [0.5 + core_r * np.cos(a), 0.5 + core_r * np.sin(a)]
+
+    # 2. First ring (8 circles), slightly inside mid-radius, angle offset for interlacing
+    ring1_r = 0.285
+    for i in range(8):
+        a = (2*np.pi*i)/8 + np.pi/16
+        centers[7+i] = [0.5 + ring1_r * np.cos(a), 0.5 + ring1_r * np.sin(a)]
+
+    # 3. Second (outer) ring (8 circles), radius closer to edge, further angle offset
+    ring2_r = 0.415
+    for i in range(8):
+        a = (2*np.pi*i)/8 + np.pi/8
+        # Slightly staggered to avoid direct alignment with ring1
+        centers[15+i] = [0.5 + ring2_r * np.cos(a), 0.5 + ring2_r * np.sin(a)]
+
+    # 4. 3 circles at edge/corner locations, in maximally open spots
+    extra_positions = np.array([
+        [0.03, 0.03],          # corner (NW)
+        [0.97, 0.5],           # mid right edge
+        [0.5, 0.97],           # mid top edge
+    ])
+    for k in range(3):
+        centers[23+k] = extra_positions[k] + rng.uniform(-0.012, 0.012, 2)
+        centers[23+k] = np.clip(centers[23+k], 0.015, 0.985)
+
+    # 5. Local repulsion & greedy radii maximization with more steps for deeper relaxation
+    centers, radii = local_relax_and_grow(centers, steps=14)
+
+    return centers, radii
+=======
+    # 1. Priority: Place circles exactly (or nearly) at the 4 corners and 4 edge midpoints for maximal use of square geometry.
+    # Corners
+    corner_inset = 0.023
+    corner_jitter = 0.006
+    corners = np.array([
+        [corner_inset, corner_inset],
+        [1-corner_inset, corner_inset],
+        [1-corner_inset, 1-corner_inset],
+        [corner_inset, 1-corner_inset],
+    ])
+    for i in range(4):
+        centers[i] = np.clip(corners[i] + rng.uniform(-corner_jitter, corner_jitter, 2), 0.012, 0.988)
+    # Edge midpoints
+    edge_inset = 0.025
+    edge_jitter = 0.009
+    edges = np.array([
+        [0.5, edge_inset],
+        [1-edge_inset, 0.5],
+        [0.5, 1-edge_inset],
+        [edge_inset, 0.5],
+    ])
+    for i in range(4):
+        centers[4+i] = np.clip(edges[i] + rng.uniform(-edge_jitter, edge_jitter, 2), 0.013, 0.987)
+
+    # 2. Central hexagon: 7 circles (center + 6 around)
+    core_r = 0.150
+    centers[8] = [0.5, 0.5]
+    for i in range(6):
+        a = np.pi/6 + i * np.pi/3
+        centers[9+i] = [0.5 + core_r * np.cos(a), 0.5 + core_r * np.sin(a)]
+
+    # 3. First ring (7 circles), slightly inside mid-radius, angle offset for interlacing
+    ring1_r = 0.272
+    for i in range(7):
+        a = (2*np.pi*i)/7 + np.pi/18
+        centers[15+i] = [0.5 + ring1_r * np.cos(a), 0.5 + ring1_r * np.sin(a)]
+
+    # 4. Second ring (8 circles), radius closer to edge, further angle offset
+    ring2_r = 0.412
+    for i in range(7):
+        a = (2*np.pi*i)/7 + np.pi/7
+        centers[22+i] = [0.5 + ring2_r * np.cos(a), 0.5 + ring2_r * np.sin(a)]
+
+    # 5. Place one extra circle in the most open slot (bottom-right, not corner or edge)
+    # This location tends to be available after two rings.
+    centers[29-3] = [0.775, 0.225] + rng.uniform(-0.011, 0.011, 2)
+    centers = np.clip(centers, 0.012, 0.988)
+
+    # 6. Local repulsion & greedy radii maximization with annealing shake + more steps
+    centers, radii = local_relax_and_grow(centers, steps=18, anneal_shake=True, rng=rng)
+
+    return centers, radii
+>>>>>>> REPLACE
+
+</DIFF>
+
+<DIFF>
+<<<<<<< SEARCH
+def local_relax_and_grow(centers, steps=8):
+    """
+    Given circle centers, iteratively relax positions to reduce overlaps and edge collisions,
+    and greedily maximize radii.
+    Returns final (centers, radii)
+    """
+    n = centers.shape[0]
+    radii = np.ones(n) * 0.068  # start a bit smaller for better initial movement
+
+    for step in range(steps):
+        # 1. Compute repulsive forces (from overlaps and boundary)
+        disp = np.zeros_like(centers)
+        for i in range(n):
+            xi, yi = centers[i]
+            # Repel from boundaries if close
+            margin = 0.012
+            force = np.zeros(2)
+            if xi < margin:
+                force[0] += (margin - xi) * 2.2
+            if xi > 1-margin:
+                force[0] -= (xi - (1-margin)) * 2.2
+            if yi < margin:
+                force[1] += (margin - yi) * 2.2
+            if yi > 1-margin:
+                force[1] -= (yi - (1-margin)) * 2.2
+            # Repel from other circles if overlap (using current radii)
+            for j in range(n):
+                if i == j: continue
+                dx, dy = centers[i] - centers[j]
+                dist = np.hypot(dx, dy)
+                if dist < 1e-7:  # avoid divide by zero
+                    force += np.random.normal(0, 0.001, 2)
+                    continue
+                minsep = radii[i] + radii[j]
+                if dist < minsep * 1.011:  # tighter slack, encourage compaction
+                    push = ((minsep - dist) / dist) * np.array([dx, dy]) * 0.62
+                    force += push
+            disp[i] = force
+
+        # 2. Move centers by small fraction of displacement
+        centers += np.clip(disp, -0.033, 0.033)
+
+        # 3. Clamp back inside unit square
+        centers = np.clip(centers, 0.013, 0.987)
+
+        # 4. Greedily maximize radii
+        radii = maximize_radii(centers)
+
+    return centers, radii
+=======
+def local_relax_and_grow(centers, steps=8, anneal_shake=False, rng=None):
+    """
+    Given circle centers, iteratively relax positions to reduce overlaps and edge collisions,
+    and greedily maximize radii.
+    If anneal_shake is True, add decaying random noise to help escape local minima.
+    Returns final (centers, radii)
+    """
+    n = centers.shape[0]
+    # Slightly smaller initial radii for better initial movement
+    radii = np.ones(n) * 0.067
+    if rng is None:
+        rng = np.random.default_rng(seed=12345)
+
+    for step in range(steps):
+        # 1. Compute repulsive forces (from overlaps and boundary)
+        disp = np.zeros_like(centers)
+        for i in range(n):
+            xi, yi = centers[i]
+            # Repel from boundaries if close
+            margin = 0.012
+            force = np.zeros(2)
+            if xi < margin:
+                force[0] += (margin - xi) * 2.2
+            if xi > 1-margin:
+                force[0] -= (xi - (1-margin)) * 2.2
+            if yi < margin:
+                force[1] += (margin - yi) * 2.2
+            if yi > 1-margin:
+                force[1] -= (yi - (1-margin)) * 2.2
+            # Repel from other circles if overlap (using current radii)
+            for j in range(n):
+                if i == j: continue
+                dx, dy = centers[i] - centers[j]
+                dist = np.hypot(dx, dy)
+                if dist < 1e-7:  # avoid divide by zero
+                    force += rng.normal(0, 0.001, 2)
+                    continue
+                minsep = radii[i] + radii[j]
+                if dist < minsep * 1.011:  # tighter slack, encourage compaction
+                    push = ((minsep - dist) / dist) * np.array([dx, dy]) * 0.62
+                    force += push
+            disp[i] = force
+
+        # 2. Move centers by small fraction of displacement
+        move = np.clip(disp, -0.033, 0.033)
+
+        # 3. Annealing random shake: add small decaying random jitter (except for first/last step)
+        if anneal_shake and (step > 2) and (step < steps-2):
+            temp = 0.012 * (1 - step/(steps-1))
+            shake = rng.normal(0, temp, centers.shape)
+            move += shake
+
+        centers += move
+
+        # 4. Clamp back inside unit square
+        centers = np.clip(centers, 0.013, 0.987)
+
+        # 5. Greedily maximize radii
+        radii = maximize_radii(centers)
+
+    return centers, radii
+>>>>>>> REPLACE
+
+</DIFF>

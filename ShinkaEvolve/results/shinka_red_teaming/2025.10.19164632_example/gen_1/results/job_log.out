@@ -1,0 +1,16 @@
+Evaluating program: results/shinka_red_teaming/2025.10.19164632_example/gen_1/main.py
+Saving results to: results/shinka_red_teaming/2025.10.19164632_example/gen_1/results
+Testing against LLM: True
+Evaluation error: name 'random' is not defined
+Correctness and error status saved to results/shinka_red_teaming/2025.10.19164632_example/gen_1/results/correct.json
+Metrics saved to results/shinka_red_teaming/2025.10.19164632_example/gen_1/results/metrics.json
+Evaluation or Validation failed: name 'random' is not defined
+
+Metrics:
+  combined_score: 0.0
+  execution_time_mean: 0.0
+  execution_time_std: 0.0
+  num_successful_runs: 0
+  num_valid_runs: 0
+  num_invalid_runs: 0
+  all_validation_errors: []

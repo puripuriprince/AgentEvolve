@@ -1,0 +1,107 @@
+<NAME>iterative_radius_refinement</NAME>
+<DESCRIPTION>
+Enhance the radius computation by performing multiple passes of the overlap-scaling loop. Iterative refinement allows radii to adjust more accurately under all pairwise constraints, potentially increasing the total sum of radii.
+</DESCRIPTION>
+<DIFF>
+<<<<<<< SEARCH
+    # Then, limit by distance to other circles
+    # Each pair of circles with centers at distance d can have
+    # sum of radii at most d to avoid overlap
+    for i in range(n):
+        for j in range(i + 1, n):
+            dist = np.sqrt(np.sum((centers[i] - centers[j]) ** 2))
+
+            # If current radii would cause overlap
+            if radii[i] + radii[j] > dist:
+                # Scale both radii proportionally
+                scale = dist / (radii[i] + radii[j])
+                radii[i] *= scale
+                radii[j] *= scale
+=======
+    # Then, iteratively limit by distance to other circles
+    # Perform multiple passes for more accurate radii
+    max_iter = 5
+    for _ in range(max_iter):
+        for i in range(n):
+            for j in range(i + 1, n):
+                dist = np.sqrt(np.sum((centers[i] - centers[j]) ** 2))
+                if radii[i] + radii[j] > dist:
+                    scale = dist / (radii[i] + radii[j])
+                    radii[i] *= scale
+                    radii[j] *= scale
+>>>>>>> REPLACE
+</DIFF>
+
+<NAME>add_radius_jitter</NAME>
+<DESCRIPTION>
+Introduce a deterministic pseudo-random number generator to add slight, reproducible jitter to ring distances. Breaking perfect symmetry can allow tighter local packings and avoid rigid overlap patterns.
+</DESCRIPTION>
+<DIFF>
+<<<<<<< SEARCH
+    centers = np.zeros((n, 2))
+=======
+    centers = np.zeros((n, 2))
+    # RNG for deterministic jitter in ring placements
+    rng = np.random.RandomState(42)
+>>>>>>> REPLACE
+</DIFF>
+
+<NAME>jitter_inner_ring</NAME>
+<DESCRIPTION>
+Apply jitter to the first ring of 8 circles to break symmetry and improve local packing.
+</DESCRIPTION>
+<DIFF>
+<<<<<<< SEARCH
+    # Place 8 circles around the center
+    for i in range(8):
+        angle = 2 * np.pi * i / 8
+        radius_dist = 0.4  # distance from center for outer ring
+        centers[i + 1] = [0.5 + radius_dist * np.cos(angle), 0.5 + radius_dist * np.sin(angle)]
+=======
+    # Place 8 circles around the center with slight jitter
+    for i in range(8):
+        angle = 2 * np.pi * i / 8
+        radius_dist = 0.4 + rng.uniform(-0.01, 0.01)  # perturbed distance for jitter
+        centers[i + 1] = [0.5 + radius_dist * np.cos(angle), 0.5 + radius_dist * np.sin(angle)]
+>>>>>>> REPLACE
+</DIFF>
+
+<NAME>jitter_middle_ring</NAME>
+<DESCRIPTION>
+Apply jitter to the middle ring of 8 circles to further diversify spacing and reduce packing regularity.
+</DESCRIPTION>
+<DIFF>
+<<<<<<< SEARCH
+    # Place 8 more circles in an outer ring
+    for i in range(8):
+        angle = 2 * np.pi * i / 8
+        radius_dist = 0.6  # further out
+        centers[i + 9] = [0.5 + radius_dist * np.cos(angle), 0.5 + radius_dist * np.sin(angle)]
+=======
+    # Place 8 more circles in an outer ring with slight jitter
+    for i in range(8):
+        angle = 2 * np.pi * i / 8
+        radius_dist = 0.6 + rng.uniform(-0.015, 0.015)  # perturbed distance for jitter
+        centers[i + 9] = [0.5 + radius_dist * np.cos(angle), 0.5 + radius_dist * np.sin(angle)]
+>>>>>>> REPLACE
+</DIFF>
+
+<NAME>jitter_outer_ring</NAME>
+<DESCRIPTION>
+Apply jitter to the outermost ring of 8 smallest circles to maximize irregularity and potentially reduce overlap-induced shrinkage.
+</DESCRIPTION>
+<DIFF>
+<<<<<<< SEARCH
+    # Place 8 smallest circles at the outermost positions
+    for i in range(8):
+        angle = 2 * np.pi * i / 8
+        radius_dist = 0.8
+        centers[i + 17] = [0.5 + radius_dist * np.cos(angle), 0.5 + radius_dist * np.sin(angle)]
+=======
+    # Place 8 smallest circles at the outermost positions with slight jitter
+    for i in range(8):
+        angle = 2 * np.pi * i / 8
+        radius_dist = 0.8 + rng.uniform(-0.02, 0.02)  # perturbed distance for jitter
+        centers[i + 17] = [0.5 + radius_dist * np.cos(angle), 0.5 + radius_dist * np.sin(angle)]
+>>>>>>> REPLACE
+</DIFF>

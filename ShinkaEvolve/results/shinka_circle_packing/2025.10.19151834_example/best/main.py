@@ -1,0 +1,122 @@
+# EVOLVE-BLOCK-START
+"""Force-directed variable radii circle packing for n=26 circles"""
+
+import numpy as np
+
+def construct_packing():
+    """
+    Force-directed optimization for 26 circles in a unit square,
+    maximizing the sum of their radii.
+    Returns:
+        Tuple of (centers, radii, sum_of_radii)
+        centers: np.array of shape (26, 2) with (x, y) coordinates
+        radii: np.array of shape (26) with radius of each circle
+        sum_of_radii: Sum of all radii
+    """
+    n = 26
+    np.random.seed(42)
+    # Start with random positions, slightly inset from the border
+    centers = 0.1 + 0.8 * np.random.rand(n, 2)
+    radii = np.full(n, 0.03)  # Small initial radii
+
+    # Parameters
+    n_steps = 600
+    initial_temp = 0.08
+    final_temp = 0.002
+    temp_decay = (final_temp / initial_temp) ** (1.0 / n_steps)
+    temp = initial_temp
+
+    for step in range(n_steps):
+        # Update radii to be as large as possible at current positions
+        radii = compute_max_radii(centers)
+
+        # Compute forces
+        forces = np.zeros_like(centers)
+        for i in range(n):
+            # Repulsion from other circles
+            for j in range(n):
+                if i == j:
+                    continue
+                delta = centers[i] - centers[j]
+                dist = np.linalg.norm(delta)
+                min_dist = radii[i] + radii[j] + 1e-6
+                if dist < min_dist:
+                    # Strong repulsion if overlapping
+                    force_mag = 0.2 * (min_dist - dist)
+                    if dist > 1e-8:
+                        forces[i] += (delta / dist) * force_mag
+                    else:
+                        forces[i] += np.random.uniform(-1, 1, 2) * force_mag
+                else:
+                    # Weak repulsion to avoid clustering
+                    force_mag = 0.01 * (min_dist / dist) ** 2
+                    forces[i] += (delta / (dist + 1e-8)) * force_mag
+
+            # Attraction to center of square
+            to_center = np.array([0.5, 0.5]) - centers[i]
+            forces[i] += 0.03 * to_center
+
+            # Soft push away from borders
+            border_push = 0.0
+            margin = radii[i] + 0.01
+            for d in range(2):
+                if centers[i, d] < margin:
+                    forces[i, d] += border_push + 0.08 * (margin - centers[i, d])
+                elif centers[i, d] > 1 - margin:
+                    forces[i, d] -= border_push + 0.08 * (centers[i, d] - (1 - margin))
+
+        # Simulated annealing: add random noise
+        noise = np.random.normal(0, temp, size=centers.shape)
+        centers += 0.18 * forces + noise
+
+        # Keep inside the square
+        centers = np.clip(centers, 0.0, 1.0)
+
+        # Anneal temperature
+        temp *= temp_decay
+
+    # Final radii update
+    radii = compute_max_radii(centers)
+    return centers, radii
+
+def compute_max_radii(centers):
+    """
+    Compute the maximum possible radii for each circle position
+    such that they don't overlap and stay within the unit square.
+    Args:
+        centers: np.array of shape (n, 2) with (x, y) coordinates
+    Returns:
+        np.array of shape (n) with radius of each circle
+    """
+    n = centers.shape[0]
+    radii = np.ones(n)
+    # Limit by distance to square borders
+    for i in range(n):
+        x, y = centers[i]
+        radii[i] = min(x, y, 1 - x, 1 - y)
+    # Limit by distance to other circles
+    for i in range(n):
+        for j in range(n):
+            if i == j:
+                continue
+            dist = np.linalg.norm(centers[i] - centers[j])
+            # Each pair: sum of radii <= dist
+            if dist < 1e-8:
+                # Overlapping centers, set radius to zero
+                radii[i] = 0.0
+            else:
+                radii[i] = min(radii[i], dist / 2.0)
+    # Ensure non-negative
+    radii = np.clip(radii, 0.0, 1.0)
+    return radii
+
+# EVOLVE-BLOCK-END
+
+
+# This part remains fixed (not evolved)
+def run_packing():
+    """Run the circle packing constructor for n=26"""
+    centers, radii = construct_packing()
+    # Calculate the sum of radii
+    sum_radii = np.sum(radii)
+    return centers, radii, sum_radii

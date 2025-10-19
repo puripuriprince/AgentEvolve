@@ -1,0 +1,37 @@
+<NAME>
+increase_iters_with_early_stop
+</NAME>
+
+<DESCRIPTION>
+Increase the number of adaptive optimization iterations from 18 to 25 and introduce `prev_sum` and `tol` variables to enable early stopping once the improvement in total radii falls below a small threshold.
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+    adaptive_iters = 18
+=======
+    adaptive_iters = 25
+    prev_sum = 0.0
+    tol = 1e-4
+>>>>>>> REPLACE
+</DIFF>
+
+<NAME>
+early_stop_check
+</NAME>
+
+<DESCRIPTION>
+After recomputing radii in each adaptive iteration, compute the current total sum of radii and break out of the loop early if the increase over the previous iteration is less than the tolerance, accelerating convergence.
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+        radii = compute_max_radii(centers)
+=======
+        radii = compute_max_radii(centers)
+        current_sum = np.sum(radii)
+        if current_sum - prev_sum < tol:
+            break
+        prev_sum = current_sum
+>>>>>>> REPLACE
+</DIFF>

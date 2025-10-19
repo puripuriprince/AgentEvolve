@@ -1,0 +1,58 @@
+<NAME>
+variable_sized_circles_centered
+</NAME>
+
+<DESCRIPTION>
+Introduce a pattern where larger circles are placed at the center and smaller circles are arranged around them, optimizing the radii distribution for better packing density. This approach leverages the idea that larger circles in the center can maximize the total sum of radii, while smaller circles fill the gaps around them, reducing wasted space. To implement this, define specific radii for each circle based on their position, with the largest at the center, and adjust their placement accordingly. This targeted placement should improve the overall sum of radii while maintaining non-overlapping constraints.
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+# Place circles in a structured pattern
+# This is a simple pattern - evolution will improve this
+
+# First, place a large circle in the center
+centers[0] = [0.5, 0.5]
+
+# Place 8 circles around it in a ring
+for i in range(8):
+    angle = 2 * np.pi * i / 8
+    centers[i + 1] = [0.5 + 0.3 * np.cos(angle), 0.5 + 0.3 * np.sin(angle)]
+
+# Place 16 more circles in an outer ring
+for i in range(16):
+    angle = 2 * np.pi * i / 16
+    centers[i + 9] = [0.5 + 0.7 * np.cos(angle), 0.5 + 0.7 * np.sin(angle)]
+=======
+# Place circles in a structured pattern
+# This is a simple pattern - evolution will improve this
+
+# Define radii for a centered large circle and smaller surrounding circles
+radii_pattern = np.array([
+    0.2,  # Center large circle
+    0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,  # 8 smaller circles around center
+    0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05,  # 8 even smaller at outer ring
+    0.03, 0.03, 0.03, 0.03, 0.03, 0.03, 0.03, 0.03  # 8 smallest at outermost ring
+])
+
+# Assign centers based on radii, positioning larger at center
+centers[0] = [0.5, 0.5]
+
+# Place 8 circles around the center
+for i in range(8):
+    angle = 2 * np.pi * i / 8
+    radius_dist = 0.4  # distance from center for outer ring
+    centers[i + 1] = [0.5 + radius_dist * np.cos(angle), 0.5 + radius_dist * np.sin(angle)]
+
+# Place 8 more circles in an outer ring
+for i in range(8):
+    angle = 2 * np.pi * i / 8
+    radius_dist = 0.6  # further out
+    centers[i + 9] = [0.5 + radius_dist * np.cos(angle), 0.5 + radius_dist * np.sin(angle)]
+
+# Place 8 smallest circles at the outermost positions
+for i in range(8):
+    angle = 2 * np.pi * i / 8
+    radius_dist = 0.8
+    centers[i + 17] = [0.5 + radius_dist * np.cos(angle), 0.5 + radius_dist * np.sin(angle)]
+>>>>>>> REPLACE

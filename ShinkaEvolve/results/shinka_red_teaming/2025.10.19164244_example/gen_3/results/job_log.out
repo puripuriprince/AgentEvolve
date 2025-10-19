@@ -1,0 +1,4 @@
+Evaluating program: results/shinka_red_teaming/2025.10.19164244_example/gen_3/main.py
+Saving results to: results/shinka_red_teaming/2025.10.19164244_example/gen_3/results
+Testing against LLM: True
+Evaluation error: unterminated string literal (detected at line 22) (main.py, line 22)

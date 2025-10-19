@@ -1,0 +1,127 @@
+# EVOLVE-BLOCK-START
+"""Hybrid ring/corner/edge adaptive circle packing for n=26 circles"""
+
+import numpy as np
+
+def construct_packing():
+    """
+    Construct a hybrid arrangement of 26 circles in a unit square,
+    combining ring, edge/corner, and adaptive refinement.
+    Returns:
+        Tuple of (centers, radii)
+        centers: np.array of shape (26, 2) with (x, y) coordinates
+        radii: np.array of shape (26) with radius of each circle
+    """
+    n = 26
+    centers = np.zeros((n, 2))
+    radii = np.zeros(n)
+
+    # 1. Place 4 circles in the corners
+    corner_margin = 0.02
+    centers[0] = [corner_margin, corner_margin]
+    centers[1] = [1 - corner_margin, corner_margin]
+    centers[2] = [1 - corner_margin, 1 - corner_margin]
+    centers[3] = [corner_margin, 1 - corner_margin]
+
+    # 2. Place 8 circles along edges (not at corners)
+    edge_offsets = np.linspace(0.22, 0.78, 4)
+    idx = 4
+    for x in edge_offsets:
+        centers[idx] = [x, corner_margin]
+        centers[idx+1] = [x, 1 - corner_margin]
+        idx += 2
+    for y in edge_offsets:
+        centers[idx] = [corner_margin, y]
+        centers[idx+1] = [1 - corner_margin, y]
+        idx += 2
+
+    # 3. Place 1 large circle in the center
+    centers[12] = [0.5, 0.5]
+
+    # 4. Place 8 circles in an inner ring around center
+    ring_r = 0.27
+    for i in range(8):
+        angle = 2 * np.pi * i / 8
+        centers[13 + i] = [0.5 + ring_r * np.cos(angle), 0.5 + ring_r * np.sin(angle)]
+
+    # 5. Place 5 circles in an outer ring (slightly offset from corners/edges)
+    outer_ring_r = 0.47
+    for i in range(5):
+        angle = 2 * np.pi * i / 5 + np.pi/10
+        centers[21 + i] = [0.5 + outer_ring_r * np.cos(angle), 0.5 + outer_ring_r * np.sin(angle)]
+
+    # 6. Small random perturbation to break symmetry
+    centers += np.random.uniform(-0.009, 0.009, centers.shape)
+    centers = np.clip(centers, 0.01, 0.99)
+
+    # 7. Adaptive refinement loop
+    adaptive_iters = 24
+    for _ in range(adaptive_iters):
+        radii = compute_max_radii(centers)
+        # Boundary and overlap adjustments
+        for i in range(n):
+            grad = np.zeros(2)
+            # Boundary repulsion
+            for d in range(2):
+                if centers[i, d] - radii[i] < 0.01:
+                    grad[d] += (0.01 - (centers[i, d] - radii[i])) * 0.6
+                if centers[i, d] + radii[i] > 0.99:
+                    grad[d] -= ((centers[i, d] + radii[i]) - 0.99) * 0.6
+            # Overlap repulsion
+            for j in range(n):
+                if i == j:
+                    continue
+                dist = np.linalg.norm(centers[i] - centers[j])
+                min_dist = radii[i] + radii[j]
+                if dist < min_dist - 1e-6:
+                    if dist > 1e-8:
+                        grad += (centers[i] - centers[j]) / dist * (min_dist - dist) * 0.19
+                    else:
+                        grad += np.random.uniform(-1, 1, 2) * 0.01
+            centers[i] += grad * 0.19
+        centers = np.clip(centers, 0.01, 0.99)
+        # Shrink radii for persistent overlaps
+        for i in range(n):
+            for j in range(i+1, n):
+                dist = np.linalg.norm(centers[i] - centers[j])
+                min_dist = radii[i] + radii[j]
+                if dist < min_dist - 1e-6:
+                    # Shrink more if overlap is large
+                    overlap = min_dist - dist
+                    shrink_factor = 0.95 if overlap > 0.018 else 0.98
+                    radii[i] *= shrink_factor
+                    radii[j] *= shrink_factor
+
+    # Final radii calculation
+    radii = compute_max_radii(centers)
+    return centers, radii
+
+def compute_max_radii(centers):
+    """
+    Compute maximum radii for each circle based on boundary and neighbor constraints.
+    """
+    n = centers.shape[0]
+    radii = np.ones(n)
+    # Boundary constraints
+    for i in range(n):
+        x, y = centers[i]
+        radii[i] = min(x, y, 1 - x, 1 - y)
+    # Overlap constraints
+    for i in range(n):
+        for j in range(i + 1, n):
+            dist = np.linalg.norm(centers[i] - centers[j])
+            if dist > 1e-8:
+                max_r = dist / 2
+                if radii[i] > max_r:
+                    radii[i] = max_r
+                if radii[j] > max_r:
+                    radii[j] = max_r
+    return radii
+
+# This part remains fixed
+def run_packing():
+    """Run the circle packing constructor for n=26"""
+    centers, radii = construct_packing()
+    sum_radii = np.sum(radii)
+    return centers, radii, sum_radii
+# EVOLVE-BLOCK-END

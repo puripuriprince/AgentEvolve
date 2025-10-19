@@ -1,0 +1,177 @@
+--- a/original.py
++++ b/original.py
+@@ -1,110 +1,102 @@
+ # EVOLVE-BLOCK-START
+-"""Constructor-based circle packing for n=26 circles"""
++# EVOLVE-BLOCK-START
++"""Enhanced hybrid variable-sized circle packing for n=26 circles"""
+ 
+ import numpy as np
+ 
+-
+ def construct_packing():
+     """
+-    Construct a specific arrangement of 26 circles in a unit square
+-    that attempts to maximize the sum of their radii.
+-
+-    Returns:
+-        Tuple of (centers, radii, sum_of_radii)
+-        centers: np.array of shape (26, 2) with (x, y) coordinates
+-        radii: np.array of shape (26) with radius of each circle
+-        sum_of_radii: Sum of all radii
++    Construct a hybrid arrangement of 26 circles in a unit square,
++    optimizing the sum of radii by strategic placement and sizing.
+     """
+-    # Initialize arrays for 26 circles
+     n = 26
+     centers = np.zeros((n, 2))
++    radii = np.zeros(n)
+ 
+-    # Place circles in a structured pattern
+-    # This is a simple pattern - evolution will improve this
++    # Place central large circle
++    centers[0] = [0.5, 0.5]
++    radii[0] = 0.2  # large center circle
+ 
+-    # Define radii for a centered large circle and smaller surrounding circles
+-    radii_pattern = np.array([
+-        0.2,  # Center large circle
+-        0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,  # 8 smaller circles around center
+-        0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05,  # 8 even smaller at outer ring
+-        0.03, 0.03, 0.03, 0.03, 0.03, 0.03, 0.03, 0.03  # 8 smallest at outermost ring
+-    ])
++    # Define concentric rings with decreasing radii
++    rings = [
++        {'radius': 0.4, 'count': 8, 'radius_scale': 0.1},
++        {'radius': 0.6, 'count': 8, 'radius_scale': 0.05},
++        {'radius': 0.8, 'count': 8, 'radius_scale': 0.03}
++    ]
+ 
+-    # Assign centers based on radii, positioning larger at center
+-    centers[0] = [0.5, 0.5]
++    index = 1
++    for ring in rings:
++        r_center = ring['radius']
++        r_circle = ring['radius_scale']
++        for i in range(ring['count']):
++            angle = 2 * np.pi * i / ring['count']
++            centers[index] = [
++                0.5 + r_center * np.cos(angle),
++                0.5 + r_center * np.sin(angle)
++            ]
++            radii[index] = r_circle
++            index += 1
+ 
+-    # Place 8 circles around the center
+-    for i in range(8):
+-        angle = 2 * np.pi * i / 8
+-        radius_dist = 0.4  # distance from center for outer ring
+-        centers[i + 1] = [0.5 + radius_dist * np.cos(angle), 0.5 + radius_dist * np.sin(angle)]
++    # Place corner and edge circles with smaller sizes
++    corner_positions = [
++        [0.1, 0.1], [0.9, 0.1], [0.1, 0.9], [0.9, 0.9],
++        [0.5, 0.05], [0.95, 0.5], [0.5, 0.95], [0.05, 0.5]
++    ]
++    corner_radii = [0.03, 0.03, 0.03, 0.03, 0.02, 0.02, 0.02, 0.02]
+ 
+-    # Place 8 more circles in an outer ring
+-    for i in range(8):
+-        angle = 2 * np.pi * i / 8
+-        radius_dist = 0.6  # further out
+-        centers[i + 9] = [0.5 + radius_dist * np.cos(angle), 0.5 + radius_dist * np.sin(angle)]
++    for i, pos in enumerate(corner_positions):
++        centers[index] = pos
++        radii[index] = corner_radii[i]
++        index += 1
+ 
+-    # Place 8 smallest circles at the outermost positions
+-    for i in range(8):
+-        angle = 2 * np.pi * i / 8
+-        radius_dist = 0.8
+-        centers[i + 17] = [0.5 + radius_dist * np.cos(angle), 0.5 + radius_dist * np.sin(angle)]
+-
+-    # Additional positioning adjustment to make sure all circles
+-    # are inside the square and don't overlap
+-    # Clip to ensure everything is inside the unit square
++    # Clip centers to stay within bounds
+     centers = np.clip(centers, 0.01, 0.99)
+ 
+-    # Compute maximum valid radii for this configuration
+-    radii = compute_max_radii(centers)
++    # Compute maximum radii considering overlaps
++    radii = compute_max_radii(centers, radii)
+     return centers, radii
+ 
+-
+-def compute_max_radii(centers):
++def compute_max_radii(centers, initial_radii):
+     """
+-    Compute the maximum possible radii for each circle position
+-    such that they don't overlap and stay within the unit square.
+-
+-    Args:
+-        centers: np.array of shape (n, 2) with (x, y) coordinates
+-
+-    Returns:
+-        np.array of shape (n) with radius of each circle
++    Adjust radii to prevent overlaps and stay within the square.
+     """
+     n = centers.shape[0]
+-    radii = np.ones(n)
++    radii = initial_radii.copy()
+ 
+-    # First, limit by distance to square borders
++    # Limit by distance to borders
+     for i in range(n):
+         x, y = centers[i]
+-        # Distance to borders
+-        radii[i] = min(x, y, 1 - x, 1 - y)
++        radii[i] = min(radii[i], x, y, 1 - x, 1 - y)
+ 
+-    # Then, limit by distance to other circles
+-    # Each pair of circles with centers at distance d can have
+-    # sum of radii at most d to avoid overlap
+-    for i in range(n):
+-        for j in range(i + 1, n):
+-            dist = np.sqrt(np.sum((centers[i] - centers[j]) ** 2))
+-
+-            # If current radii would cause overlap
+-            if radii[i] + radii[j] > dist:
+-                # Scale both radii proportionally
+-                scale = dist / (radii[i] + radii[j])
+-                radii[i] *= scale
+-                radii[j] *= scale
+-
++    # Iteratively refine radii to avoid overlaps
++    for _ in range(3):  # multiple passes for better packing
++        for i in range(n):
++            for j in range(i + 1, n):
++                dist = np.linalg.norm(centers[i] - centers[j])
++                if dist < radii[i] + radii[j]:
++                    # Reduce radii proportionally
++                    overlap = radii[i] + radii[j]
++                    scale = dist / overlap
++                    radii[i] *= scale
++                    radii[j] *= scale
++                    # Ensure radii do not become too small
++                    radii[i] = max(radii[i], 0.005)
++                    radii[j] = max(radii[j], 0.005)
+     return radii
+ 
+-
++# This part remains fixed (not evolved)
++def run_packing():
++    """Run the circle packing constructor for n=26"""
++    centers, radii = construct_packing()
++    sum_radii = np.sum(radii)
++    return centers, radii, sum_radii
+ # EVOLVE-BLOCK-END
+ 
+ 
+ # This part remains fixed (not evolved)
+ def run_packing():
+     """Run the circle packing constructor for n=26"""
+     centers, radii = construct_packing()
+     # Calculate the sum of radii
+     sum_radii = np.sum(radii)
+     return centers, radii, sum_radii

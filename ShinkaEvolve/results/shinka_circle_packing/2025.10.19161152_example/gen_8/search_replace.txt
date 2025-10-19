@@ -1,0 +1,112 @@
+<NAME>
+denser_hybrid_edge_corners
+</NAME>
+
+<DESCRIPTION>
+The current approach uses a hybrid of corners, edges, and two inner rings. However, the edge positions are not fully utilized: only 3 per vertical and 2 per horizontal edge, with a relatively large gap between them, and there is no bias for placing slightly larger circles near the center. The inner rings are also not "hexagonally" efficient: the split 6+5 and their radii can be improved.
+
+Drawing from expert knowledge, I propose to:
+- Place 4 at the corners (but move them even closer to the corners for more room for others).
+- Place 12 along the edges (3 per edge, not including corners), symmetrically. This increases edge utilization.
+- Place 9 in two inner rings: 4 in a "diamond" at radius r1, and 5 at r2 (angled to avoid overlap).
+This balances edge and central density, and is a known effective hybrid for moderate n.
+Fine-tune the ring radii and edge insets to get maximum sum of radii.
+
+This new layout should better leverage the available space, especially on the edges.
+
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+    # Improved: 1 center, 4 corners, 10 edges, 6+5 in two rings (twisted)
+    n = 26
+    centers = np.zeros((n, 2))
+
+    # 0: Central circle
+    centers[0] = [0.5, 0.5]
+
+    # 1-4: Corners, closer to corners
+    corner_inset = 0.09
+    centers[1] = [corner_inset, corner_inset]
+    centers[2] = [1 - corner_inset, corner_inset]
+    centers[3] = [1 - corner_inset, 1 - corner_inset]
+    centers[4] = [corner_inset, 1 - corner_inset]
+
+    # 5-14: Edges, distribute 3 on each long edge (excluding corners), 2 on short edges
+    edge_inset = 0.085
+    edge_positions = [0.23, 0.5, 0.77]  # points along the edge (excluding corners)
+    # Left edge (x fixed, y varies)
+    centers[5] = [edge_inset, edge_positions[0]]
+    centers[6] = [edge_inset, edge_positions[1]]
+    centers[7] = [edge_inset, edge_positions[2]]
+    # Right edge
+    centers[8] = [1 - edge_inset, edge_positions[0]]
+    centers[9] = [1 - edge_inset, edge_positions[1]]
+    centers[10] = [1 - edge_inset, edge_positions[2]]
+    # Bottom edge (y fixed, x varies)
+    centers[11] = [edge_positions[0], edge_inset]
+    centers[12] = [edge_positions[2], edge_inset]
+    # Top edge
+    centers[13] = [edge_positions[0], 1 - edge_inset]
+    centers[14] = [edge_positions[2], 1 - edge_inset]
+
+    # 15-20: Inner ring 1 (radius r1, 6 circles)
+    r1 = 0.23
+    for k in range(6):
+        theta = 2 * np.pi * k / 6 + np.pi/12  # slight twist
+        centers[15 + k] = [0.5 + r1 * np.cos(theta), 0.5 + r1 * np.sin(theta)]
+
+    # 21-25: Inner ring 2 (radius r2, 5 circles, offset from previous)
+    r2 = 0.355
+    for k in range(5):
+        theta = 2 * np.pi * k / 5 + np.pi/6
+        centers[21 + k] = [0.5 + r2 * np.cos(theta), 0.5 + r2 * np.sin(theta)]
+=======
+    # New hybrid: 1 center, 4 corners, 12 edges (3 per edge), 4+5 in two inner rings (diamond + pentagon)
+    n = 26
+    centers = np.zeros((n, 2))
+
+    # 0: Central circle
+    centers[0] = [0.5, 0.5]
+
+    # 1-4: Corners, inset closer to corners for more room
+    corner_inset = 0.065
+    centers[1] = [corner_inset, corner_inset]
+    centers[2] = [1 - corner_inset, corner_inset]
+    centers[3] = [1 - corner_inset, 1 - corner_inset]
+    centers[4] = [corner_inset, 1 - corner_inset]
+
+    # 5-16: Edges, 3 per edge (not including corners)
+    edge_inset = 0.09
+    edge_positions = [0.25, 0.5, 0.75]
+    # Bottom edge (y fixed)
+    centers[5] = [edge_positions[0], edge_inset]
+    centers[6] = [edge_positions[1], edge_inset]
+    centers[7] = [edge_positions[2], edge_inset]
+    # Right edge (x fixed)
+    centers[8] = [1 - edge_inset, edge_positions[0]]
+    centers[9] = [1 - edge_inset, edge_positions[1]]
+    centers[10] = [1 - edge_inset, edge_positions[2]]
+    # Top edge (y fixed)
+    centers[11] = [edge_positions[0], 1 - edge_inset]
+    centers[12] = [edge_positions[1], 1 - edge_inset]
+    centers[13] = [edge_positions[2], 1 - edge_inset]
+    # Left edge (x fixed)
+    centers[14] = [edge_inset, edge_positions[0]]
+    centers[15] = [edge_inset, edge_positions[1]]
+    centers[16] = [edge_inset, edge_positions[2]]
+
+    # 17-20: Inner ring 1 (diamond), radius r1, 4 circles
+    r1 = 0.215
+    for k in range(4):
+        theta = np.pi/4 + np.pi/2 * k
+        centers[17 + k] = [0.5 + r1 * np.cos(theta), 0.5 + r1 * np.sin(theta)]
+
+    # 21-25: Inner ring 2 (pentagon), radius r2, 5 circles, rotated for symmetry
+    r2 = 0.33
+    for k in range(5):
+        theta = 2 * np.pi * k / 5 + np.pi/10
+        centers[21 + k] = [0.5 + r2 * np.cos(theta), 0.5 + r2 * np.sin(theta)]
+>>>>>>> REPLACE
+
+</DIFF>

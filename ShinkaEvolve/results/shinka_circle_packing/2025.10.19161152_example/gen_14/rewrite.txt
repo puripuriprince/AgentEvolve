@@ -1,0 +1,122 @@
+# EVOLVE-BLOCK-START
+"""Sector grid hybrid circle packing for n=26 circles in a unit square."""
+
+import numpy as np
+
+def place_corners(inset):
+    """Return 4 corners inset by 'inset'."""
+    return np.array([
+        [inset, inset],
+        [1-inset, inset],
+        [1-inset, 1-inset],
+        [inset, 1-inset]
+    ])
+
+def place_edge_midpoints(inset, n_per_edge):
+    """Place n_per_edge circles per edge, inset from edges and corners."""
+    centers = []
+    for i, (axis, fixed_val) in enumerate([(1, 0), (0, 1), (1, 1), (0, 0)]): # bottom, right, top, left
+        lin = np.linspace(inset, 1-inset, n_per_edge+2)[1:-1]
+        for val in lin:
+            pt = [0,0]
+            pt[axis] = fixed_val if fixed_val in (0,1) else val
+            pt[1-axis] = val if fixed_val in (0,1) else fixed_val
+            centers.append(pt)
+    return np.array(centers)
+
+def place_rings(center, radii_list, counts, theta_offsets=None):
+    """Place circles in concentric rings."""
+    arr = []
+    for idx, (r, n) in enumerate(zip(radii_list, counts)):
+        if n <= 0:
+            continue
+        theta0 = 0.0 if theta_offsets is None else theta_offsets[idx]
+        arr.extend([
+            [center[0]+r*np.cos(theta0+2*np.pi*i/n), center[1]+r*np.sin(theta0+2*np.pi*i/n)]
+            for i in range(n)
+        ])
+    return np.array(arr)
+
+def construct_packing():
+    """
+    Arrange 26 circles using a hybrid of sector grid and ring methods.
+    Returns:
+        centers: (26,2) array
+        radii: (26,) array
+    """
+    n = 26
+    groups = []
+
+    # 1. Center
+    groups.append(np.array([[0.5, 0.5]]))
+
+    # 2. Four corners, slightly off edges
+    groups.append(place_corners(0.065))
+
+    # 3. Edges: 2 evenly spaced per edge (not including corners)
+    groups.append(place_edge_midpoints(0.095, n_per_edge=2))  # 8
+
+    # 4. Ring 1: Diamond (4), radius tuned for space
+    groups.append(place_rings([0.5,0.5], [0.21], [4], [np.pi/4]))
+
+    # 5. Ring 2: Pentagon (5), "rotated" for symmetry, larger radius
+    groups.append(place_rings([0.5,0.5], [0.33], [5], [np.pi/10]))
+
+    # 6. Ring 3: Heptagon (7), even larger radius, slight twist
+    # To fill remaining 2 circles, allocate to a 7-member outer ring, but only use 7-5=2 positions
+    # But instead, distribute the last 6 circles as:
+    # - 4 edge-centers (middle of each edge), and 2 in a small inner triangle at (0.33,0.5), (0.5,0.67)
+    edge_centers = np.array([[0.5,0.095],[0.905,0.5],[0.5,0.905],[0.095,0.5]])
+    groups.append(edge_centers)
+    # The final 2: between rings, on axis
+    groups.append(np.array([[0.33,0.5],[0.67,0.5]]))
+
+    # Concatenate all groups
+    centers = np.vstack(groups)
+
+    # Safety: ensure everything is inside (0.01,0.99)
+    centers = np.clip(centers, 0.01, 0.99)
+    assert centers.shape[0] == n
+
+    # Compute radii
+    radii = compute_radii_iterative(centers)
+    return centers, radii
+
+def compute_radii_iterative(centers, max_iter=10, tol=1e-9):
+    """Refine radii by iterative pairwise constraints & border constraints."""
+    n = centers.shape[0]
+    radii = np.array([min(x, y, 1-x, 1-y) for x, y in centers])
+    for _ in range(max_iter):
+        changed = False
+        for i in range(n):
+            for j in range(i+1, n):
+                d = np.linalg.norm(centers[i]-centers[j])
+                if d <= 1e-12:
+                    radii[i] = radii[j] = 0
+                elif radii[i] + radii[j] > d:
+                    total = radii[i] + radii[j]
+                    scale = d / total
+                    new_ri = radii[i]*scale
+                    new_rj = radii[j]*scale
+                    if abs(new_ri - radii[i]) > tol or abs(new_rj - radii[j]) > tol:
+                        radii[i], radii[j] = new_ri, new_rj
+                        changed = True
+        # Border constraint
+        for i in range(n):
+            border = min(centers[i][0], centers[i][1], 1-centers[i][0], 1-centers[i][1])
+            if radii[i] > border + tol:
+                radii[i] = border
+                changed = True
+        if not changed:
+            break
+    return radii
+
+# EVOLVE-BLOCK-END
+
+# This part remains fixed (not evolved)
+def run_packing():
+    """Run the circle packing constructor for n=26"""
+    centers, radii = construct_packing()
+    # Calculate the sum of radii
+    sum_radii = np.sum(radii)
+    return centers, radii, sum_radii

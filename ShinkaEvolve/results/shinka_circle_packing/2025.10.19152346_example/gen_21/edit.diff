@@ -1,0 +1,388 @@
+--- a/original.py
++++ b/original.py
+@@ -1,161 +1,256 @@
+ # EVOLVE-BLOCK-START
+-"""Adaptive edge-center hybrid circle packing for n=26 circles"""
++"""Hexagonal ring adaptive shrinking circle packing for n=26"""
+ 
+ import numpy as np
+ 
+ def construct_packing():
+-    """
+-    Construct an adaptive arrangement of 26 circles in a unit square
+-    that attempts to maximize the sum of their radii.
+-    Returns:
+-        Tuple of (centers, radii)
+-        centers: np.array of shape (26, 2) with (x, y) coordinates
+-        radii: np.array of shape (26) with radius of each circle
+-    """
+     n = 26
+     centers = np.zeros((n, 2))
+     radii = np.zeros(n)
+ 
+-    # Parameters
+-    edge_weight = 8
+-    corner_weight = 4
+-    center_weight = 6
+-    inner_ring_weight = 8
+-    perturb_scale = 0.012
+-    adaptive_iters = 25
+-    prev_sum = 0.0
+-    tol = 1e-4
+-    shrink_factor = 0.98
+-
+-    # 1. Place 4 large circles near corners
+-    corner_pos = [
+-        [0.08, 0.08],
+-        [0.92, 0.08],
+-        [0.92, 0.92],
+-        [0.08, 0.92]
+-    ]
+-    for i in range(corner_weight):
+-        centers[i] = corner_pos[i]
+-        radii[i] = 0.08
+-
+-    # 2. Place 8 circles along edges (not at corners)
+-    edge_offsets = np.linspace(0.22, 0.78, edge_weight//2)
+-    idx = corner_weight
+-    for x in edge_offsets:
+-        centers[idx] = [x, 0.04]
+-        centers[idx+1] = [x, 0.96]
+-        radii[idx] = radii[idx+1] = 0.06
+-        idx += 2
+-
+-    # 3. Place 6 circles in the center region (hex pattern)
+-    center_hex = [
+-        [0.5, 0.5],
+-        [0.5+0.14, 0.5],
+-        [0.5-0.14, 0.5],
+-        [0.5, 0.5+0.14],
+-        [0.5, 0.5-0.14],
+-        [0.5+0.095, 0.5+0.095]
+-    ]
+-    for i in range(center_weight):
+-        centers[idx] = center_hex[i]
+-        radii[idx] = 0.10
+-        idx += 1
+-
+-    # 4. Place 8 circles in an inner ring
+-    ring_r = 0.33
+-    for i in range(inner_ring_weight):
+-        angle = 2 * np.pi * i / inner_ring_weight
+-        centers[idx] = [0.5 + ring_r * np.cos(angle), 0.5 + ring_r * np.sin(angle)]
+-        radii[idx] = 0.07
+-        idx += 1
+-
+-    # Compute adaptive initial radii based on spacing
+-    initial_shrink = 0.9
+-    radii = compute_max_radii(centers) * initial_shrink
+-
+-    # 5. Small random perturbations to break symmetry
+-    centers += np.random.uniform(-perturb_scale, perturb_scale, centers.shape)
++    # --- Structured initial placement as concentric hexagonal rings ---
++
++    # Center circle (largest)
++    centers[0] = [0.5, 0.5]
++
++    # First hex ring (6 circles) radius approx 0.18 from center
++    r1 = 0.18
++    for i in range(6):
++        angle = np.pi/3 * i
++        centers[1 + i] = 0.5 + r1 * np.array([np.cos(angle), np.sin(angle)])
++
++    # Second hex ring (12 circles) radius approx 0.35 from center
++    r2 = 0.35
++    for i in range(12):
++        angle = np.pi/6 + (np.pi/6) * i  # offset for even spacing of 12
++        centers[7 + i] = 0.5 + r2 * np.array([np.cos(angle), np.sin(angle)])
++
++    # Remaining 7 circles arranged near edges and corners, smaller radii expected
++    edge_buffer = 0.08  # keep some margin from edges
++    edge_spots = np.array([
++        [edge_buffer, edge_buffer],
++        [0.5, edge_buffer*0.9],
++        [1 - edge_buffer, edge_buffer],
++        [1 - edge_buffer, 0.5],
++        [1 - edge_buffer, 1 - edge_buffer],
++        [0.5, 1 - edge_buffer*0.9],
++        [edge_buffer, 1 - edge_buffer]
++    ])
++    centers[19:] = edge_spots
++
++    # Initial radii estimates: center largest, rings medium, edges smallest
++    radii[:1] = 0.07
++    radii[1:7] = 0.04
++    radii[7:19] = 0.03
++    radii[19:] = 0.015
++
++    # Clip centers inside unit square margins
+     centers = np.clip(centers, 0.01, 0.99)
+ 
+-    # 6. Adaptive local optimization
+-    for it in range(adaptive_iters):
+-        # Recompute radii to maximize size without overlap or boundary violation
+-        radii = compute_max_radii(centers)
+-        current_sum = np.sum(radii)
+-        if current_sum - prev_sum < tol:
+-            break
+-        prev_sum = current_sum
+-        # Nudge centers away from overlaps and boundaries
++    # --- Adaptive optimization parameters ---
++    max_iters = 200
++    tol = 1e-5
++    step_pos = 0.01
++    max_shrink = 0.993
++    min_radius = 0.005
++
++    # Per-circle shrink factors (dynamic)
++    shrink_factors = np.ones(n)
++
++    # Track improvement to implement early stopping
++    prev_sum = 0
++    no_improve_iters = 0
++    max_no_improve = 20
++
++    for iteration in range(max_iters):
++        # Compute pairwise distances and overlaps
++        diffs = centers[:, None, :] - centers[None, :, :]
++        dists = np.linalg.norm(diffs, axis=2)
++        np.fill_diagonal(dists, np.inf)
++
++        # Compute maximum possible radii constrained by borders
++        border_radii = np.minimum.reduce([centers[:,0], centers[:,1], 1-centers[:,0], 1-centers[:,1]])
++        # Radii limited also by neighboring circles
++        radii_max = border_radii.copy()
++
++        for i in range(n):
++            for j in range(i+1, n):
++                dist = dists[i,j]
++                if dist < np.inf:
++                    max_r = dist / 2
++                    if max_r < radii_max[i]:
++                        radii_max[i] = max_r
++                    if max_r < radii_max[j]:
++                        radii_max[j] = max_r
++
++        # Apply dynamic shrink factors to avoid sudden radius increase causing overlaps
++        radii_new = np.minimum(radii_max, radii * shrink_factors)
++
++        # Compute gradients: position and radius adjustment
++        grad_positions = np.zeros_like(centers)
++        radius_shrink_updates = np.ones(n)
++
++        total_radius = np.sum(radii)
++        total_radius_new = np.sum(radii_new)
++
++        # Gradient for positions - repel overlapping circles and respect borders
+         for i in range(n):
+             grad = np.zeros(2)
+-            # Boundary repulsion
++            # Border repulsion
+             for d in range(2):
+-                if centers[i, d] - radii[i] < 0.0:
+-                    grad[d] += (0.01 - (centers[i, d] - radii[i])) * 0.5
+-                if centers[i, d] + radii[i] > 1.0:
+-                    grad[d] -= ((centers[i, d] + radii[i]) - 0.99) * 0.5
+-            # Overlap repulsion
++                low_dist = centers[i,d] - radii_new[i] - 0.01
++                if low_dist < 0:
++                    grad[d] += -low_dist * 2  # repulsive force
++                high_dist = centers[i,d] + radii_new[i] - 0.99
++                if high_dist > 0:
++                    grad[d] += -high_dist * 2
++            # Overlap repulsion with neighbors
+             for j in range(n):
+                 if i == j:
+                     continue
+-                dist = np.linalg.norm(centers[i] - centers[j])
+-                min_dist = radii[i] + radii[j]
+-                if dist < min_dist - 1e-6:
+-                    if dist > 1e-8:
+-                        grad += (centers[i] - centers[j]) / dist * (min_dist - dist) * 0.15
++                dist = dists[i,j]
++                overlap = radii_new[i] + radii_new[j] - dist
++                if overlap > 0:
++                    if dist > 1e-10:
++                        direction = (centers[i] - centers[j]) / dist
+                     else:
+-                        grad += np.random.uniform(-1, 1, 2) * 0.01
+-            # Apply small step
+-            centers[i] += grad * 0.25
+-        # Clip to square
++                        direction = np.random.uniform(-1,1,2)
++                        direction /= np.linalg.norm(direction)
++                    grad += direction * overlap * 3  # weighted repulsion
++
++                    # Encourage shrink if persistent overlap
++                    radius_shrink_updates[i] *= max_shrink
++                    radius_shrink_updates[j] *= max_shrink
++            grad_positions[i] = grad
++
++        # Normalize gradients to step_pos scale
++        norms = np.linalg.norm(grad_positions, axis=1)
++        norms[norms < 1e-12] = 1
++        grad_positions = (grad_positions.T / norms * step_pos).T
++
++        # Update centers
++        centers += grad_positions
+         centers = np.clip(centers, 0.01, 0.99)
+-        # If overlaps persist, shrink radii slightly
++
++        # Update shrink factors for radii per circle
++        shrink_factors = np.minimum(shrink_factors, radius_shrink_updates)
++        # Prevent shrinking below min radius fraction
++        shrink_factors = np.maximum(shrink_factors, min_radius / (radii + 1e-10))
++
++        # Set new radii
++        radii = np.minimum(radii_new, radii * shrink_factors)
++        radii = np.maximum(radii, min_radius)
++
++        # Check improvement and early stop
++        sum_radii = np.sum(radii)
++        if sum_radii - prev_sum < tol:
++            no_improve_iters += 1
++            if no_improve_iters >= max_no_improve:
++                break
++        else:
++            no_improve_iters = 0
++            prev_sum = sum_radii
++
++    # --- Small random shake step to escape local minima ---
++
++    shake_trials = 15
++    best_sum = np.sum(radii)
++    best_centers = centers.copy()
++    best_radii = radii.copy()
++
++    for _ in range(shake_trials):
++        trial_centers = centers.copy()
++        trial_radii = radii.copy()
++        selected = np.random.choice(n, 3, replace=False)
++        for idx in selected:
++            perturb = (np.random.rand(2) - 0.5) * 0.06
++            trial_centers[idx] += perturb
++        trial_centers = np.clip(trial_centers, 0.01, 0.99)
++
++        # Run few adaptive steps after shake
++        trial_radii, trial_centers = local_refine_after_shake(trial_centers, trial_radii,
++                                                             max_steps=30,
++                                                             step_pos=0.012,
++                                                             min_radius=min_radius,
++                                                             max_shrink=max_shrink)
++
++        trial_sum = np.sum(trial_radii)
++        if trial_sum > best_sum + 1e-5:
++            best_sum = trial_sum
++            best_centers = trial_centers.copy()
++            best_radii = trial_radii.copy()
++
++    return best_centers, best_radii
++
++
++def local_refine_after_shake(centers, radii, max_steps=30, step_pos=0.01, min_radius=0.005, max_shrink=0.993):
++    n = centers.shape[0]
++    shrink_factors = np.ones(n)
++    for _ in range(max_steps):
++        diffs = centers[:, None, :] - centers[None, :, :]
++        dists = np.linalg.norm(diffs, axis=2)
++        np.fill_diagonal(dists, np.inf)
++        border_radii = np.minimum.reduce([centers[:,0], centers[:,1], 1-centers[:,0], 1-centers[:,1]])
++        radii_max = border_radii.copy()
+         for i in range(n):
+             for j in range(i+1, n):
+-                dist = np.linalg.norm(centers[i] - centers[j])
+-                if dist < radii[i] + radii[j] - 1e-6:
+-                    radii[i] *= shrink_factor
+-                    radii[j] *= shrink_factor
+-
+-    # Final radii computation
+-    radii = compute_max_radii(centers)
+-    return centers, radii
+-
+-def compute_max_radii(centers):
+-    """
+-    Compute the maximum possible radii for each circle position
+-    such that they don't overlap and stay within the unit square.
+-    Args:
+-        centers: np.array of shape (n, 2) with (x, y) coordinates
+-    Returns:
+-        np.array of shape (n) with radius of each circle
+-    """
+-    n = centers.shape[0]
+-    radii = np.ones(n)
+-    # Limit by distance to square borders
+-    for i in range(n):
+-        x, y = centers[i]
+-        radii[i] = min(x, y, 1 - x, 1 - y)
+-    # Limit by distance to other circles
+-    for i in range(n):
+-        for j in range(i + 1, n):
+-            dist = np.linalg.norm(centers[i] - centers[j])
+-            if dist < 1e-8:
+-                continue
+-            max_r = dist / 2.0
+-            if radii[i] > max_r:
+-                radii[i] = max_r
+-            if radii[j] > max_r:
+-                radii[j] = max_r
+-    return radii
++                dist = dists[i,j]
++                if dist < np.inf:
++                    max_r = dist / 2
++                    if max_r < radii_max[i]:
++                        radii_max[i] = max_r
++                    if max_r < radii_max[j]:
++                        radii_max[j] = max_r
++
++        radii_new = np.minimum(radii_max, radii * shrink_factors)
++
++        grad_positions = np.zeros_like(centers)
++        radius_shrink_updates = np.ones(n)
++        for i in range(n):
++            grad = np.zeros(2)
++            for d in range(2):
++                low_dist = centers[i,d] - radii_new[i] - 0.01
++                if low_dist < 0:
++                    grad[d] += -low_dist * 2
++                high_dist = centers[i,d] + radii_new[i] - 0.99
++                if high_dist > 0:
++                    grad[d] += -high_dist * 2
++            for j in range(n):
++                if i == j:
++                    continue
++                dist = dists[i,j]
++                overlap = radii_new[i] + radii_new[j] - dist
++                if overlap > 0:
++                    if dist > 1e-10:
++                        direction = (centers[i] - centers[j]) / dist
++                    else:
++                        direction = np.random.uniform(-1,1,2)
++                        direction /= np.linalg.norm(direction)
++                    grad += direction * overlap * 3
++                    radius_shrink_updates[i] *= max_shrink
++                    radius_shrink_updates[j] *= max_shrink
++            grad_positions[i] = grad
++
++        norms = np.linalg.norm(grad_positions, axis=1)
++        norms[norms < 1e-12] = 1
++        grad_positions = (grad_positions.T / norms * step_pos).T
++        centers += grad_positions
++        centers = np.clip(centers, 0.01, 0.99)
++
++        shrink_factors = np.minimum(shrink_factors, radius_shrink_updates)
++        shrink_factors = np.maximum(shrink_factors, min_radius / (radii + 1e-10))
++
++        radii = np.minimum(radii_new, radii * shrink_factors)
++        radii = np.maximum(radii, min_radius)
++    return radii, centers
+ 
+ # EVOLVE-BLOCK-END
+ 
+ 
+ # This part remains fixed (not evolved)
+ def run_packing():
+     """Run the circle packing constructor for n=26"""
+     centers, radii = construct_packing()
+     # Calculate the sum of radii
+     sum_radii = np.sum(radii)
+     return centers, radii, sum_radii

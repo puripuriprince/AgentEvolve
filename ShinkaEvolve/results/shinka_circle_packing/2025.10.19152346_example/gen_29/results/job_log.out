@@ -1,0 +1,22 @@
+/Users/arnauddenis-remillard/Documents/Personnel/Projet/Build_mtl/AgentEvolve/ShinkaEvolve
+Launching evaluation of function:
+_target_: examples.circle_packing.evaluate.main
+program_path: /Users/arnauddenis-remillard/Documents/Personnel/Projet/Build_mtl/AgentEvolve/ShinkaEvolve/results/shinka_circle_packing/2025.10.19152346_example/gen_29/main.py
+results_dir: /Users/arnauddenis-remillard/Documents/Personnel/Projet/Build_mtl/AgentEvolve/ShinkaEvolve/results/shinka_circle_packing/2025.10.19152346_example/gen_29/results
+
+Evaluating program: /Users/arnauddenis-remillard/Documents/Personnel/Projet/Build_mtl/AgentEvolve/ShinkaEvolve/results/shinka_circle_packing/2025.10.19152346_example/gen_29/main.py
+Saving results to: /Users/arnauddenis-remillard/Documents/Personnel/Projet/Build_mtl/AgentEvolve/ShinkaEvolve/results/shinka_circle_packing/2025.10.19152346_example/gen_29/results
+Run 1/1 completed in 0.07 seconds
+Detailed packing data saved to /Users/arnauddenis-remillard/Documents/Personnel/Projet/Build_mtl/AgentEvolve/ShinkaEvolve/results/shinka_circle_packing/2025.10.19152346_example/gen_29/results/extra.npz
+Correctness and error status saved to /Users/arnauddenis-remillard/Documents/Personnel/Projet/Build_mtl/AgentEvolve/ShinkaEvolve/results/shinka_circle_packing/2025.10.19152346_example/gen_29/results/correct.json
+Metrics saved to /Users/arnauddenis-remillard/Documents/Personnel/Projet/Build_mtl/AgentEvolve/ShinkaEvolve/results/shinka_circle_packing/2025.10.19152346_example/gen_29/results/metrics.json
+Evaluation and Validation completed successfully.
+Metrics:
+  combined_score: 1.5263505316832229
+  public: {'centers_str': '  centers[0] = (0.5212, 0.4625)\n  centers[1] = (0.8215, 0.4339)\n  centers[2] = (0.7712, 0.7285)\n  centers[3] = (0.5015, 0.8082)\n  centers[4] = (0.3262, 0.7489)\n  centers[5] = (0.2171, 0.5600)\n  centers[6] = (0.3230, 0.3056)\n  centers[7] = (0.4966, 0.2255)\n  centers[8] = (0.7567, 0.2872)\n  centers[9] = (0.9482, 0.4206)\n  centers[10] = (0.9490, 0.7499)\n  centers[11] = (0.8376, 0.9900)\n  centers[12] = (0.5716, 0.9371)\n  centers[13] = (0.3077, 0.9346)\n  centers[14] = (0.0314, 0.9034)\n  centers[15] = (0.0422, 0.6638)\n  centers[16] = (0.0887, 0.3778)\n  centers[17] = (0.0166, 0.0395)\n  centers[18] = (0.2837, 0.0216)\n  centers[19] = (0.5466, 0.0650)\n  centers[20] = (0.7911, 0.0100)\n  centers[21] = (0.9390, 0.2259)\n  centers[22] = (0.0642, 0.0335)\n  centers[23] = (0.9773, 0.0646)\n  centers[24] = (0.0209, 0.9900)\n  centers[25] = (0.9248, 0.8916)', 'num_circles': 26}
+  private: {'reported_sum_of_radii': 1.5263505316832229}
+  execution_time_mean: 0.07310479099396616
+  execution_time_std: 0.0
+  num_valid_runs: 1
+  num_invalid_runs: 0
+  all_validation_errors: []

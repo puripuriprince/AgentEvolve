@@ -1,0 +1,22 @@
+/Users/arnauddenis-remillard/Documents/Personnel/Projet/Build_mtl/AgentEvolve/ShinkaEvolve
+Launching evaluation of function:
+_target_: examples.circle_packing.evaluate.main
+program_path: /Users/arnauddenis-remillard/Documents/Personnel/Projet/Build_mtl/AgentEvolve/ShinkaEvolve/results/shinka_circle_packing/2025.10.19161152_example/gen_19/main.py
+results_dir: /Users/arnauddenis-remillard/Documents/Personnel/Projet/Build_mtl/AgentEvolve/ShinkaEvolve/results/shinka_circle_packing/2025.10.19161152_example/gen_19/results
+
+Evaluating program: /Users/arnauddenis-remillard/Documents/Personnel/Projet/Build_mtl/AgentEvolve/ShinkaEvolve/results/shinka_circle_packing/2025.10.19161152_example/gen_19/main.py
+Saving results to: /Users/arnauddenis-remillard/Documents/Personnel/Projet/Build_mtl/AgentEvolve/ShinkaEvolve/results/shinka_circle_packing/2025.10.19161152_example/gen_19/results
+Run 1/1 completed in 0.05 seconds
+Detailed packing data saved to /Users/arnauddenis-remillard/Documents/Personnel/Projet/Build_mtl/AgentEvolve/ShinkaEvolve/results/shinka_circle_packing/2025.10.19161152_example/gen_19/results/extra.npz
+Correctness and error status saved to /Users/arnauddenis-remillard/Documents/Personnel/Projet/Build_mtl/AgentEvolve/ShinkaEvolve/results/shinka_circle_packing/2025.10.19161152_example/gen_19/results/correct.json
+Metrics saved to /Users/arnauddenis-remillard/Documents/Personnel/Projet/Build_mtl/AgentEvolve/ShinkaEvolve/results/shinka_circle_packing/2025.10.19161152_example/gen_19/results/metrics.json
+Evaluation or Validation failed: Validation failed: Circle 23 (x=0.4992, y=0.0080, r=0.0100) is outside unit square.
+Metrics:
+  combined_score: 1.6721818223414597
+  public: {'centers_str': '  centers[0] = (0.5046, 0.4972)\n  centers[1] = (0.6955, 0.4976)\n  centers[2] = (0.5985, 0.6429)\n  centers[3] = (0.4102, 0.6651)\n  centers[4] = (0.3237, 0.5008)\n  centers[5] = (0.4142, 0.3472)\n  centers[6] = (0.6030, 0.3402)\n  centers[7] = (0.8907, 0.5162)\n  centers[8] = (0.7666, 0.6643)\n  centers[9] = (0.6548, 0.7992)\n  centers[10] = (0.4753, 0.8381)\n  centers[11] = (0.3006, 0.8397)\n  centers[12] = (0.2310, 0.6651)\n  centers[13] = (0.1578, 0.4765)\n  centers[14] = (0.2294, 0.3254)\n  centers[15] = (0.3402, 0.1985)\n  centers[16] = (0.5095, 0.1988)\n  centers[17] = (0.6931, 0.1601)\n  centers[18] = (0.7719, 0.3409)\n  centers[19] = (0.1304, 0.1304)\n  centers[20] = (0.1304, 0.8696)\n  centers[21] = (0.8696, 0.1304)\n  centers[22] = (0.8696, 0.8696)\n  centers[23] = (0.4992, 0.0080)\n  centers[24] = (0.5169, 0.9920)\n  centers[25] = (0.0080, 0.5216)', 'num_circles': 26}
+  private: {'reported_sum_of_radii': 1.6721818223414597}
+  execution_time_mean: 0.052272166998591274
+  execution_time_std: 0.0
+  num_valid_runs: 0
+  num_invalid_runs: 1
+  all_validation_errors: ['Circle 23 (x=0.4992, y=0.0080, r=0.0100) is outside unit square.']

@@ -1,0 +1,30 @@
+<NAME>
+adaptive_radius_shrinkage
+</NAME>
+<DESCRIPTION>
+Introduce an adaptive radius shrinkage mechanism based on local overlap severity. When persistent overlaps are detected during the iterative refinement, circles involved in overlaps will have their radii shrunk more aggressively (e.g., by a factor of 0.95) instead of a fixed 0.98. This targeted shrinking allows the algorithm to resolve overlaps more effectively, potentially leading to denser packings. The approach leverages the insight that circles with persistent overlaps need more significant adjustment, and adaptive shrinking can accelerate convergence to a better configuration.
+</DESCRIPTION>
+<DIFF>
+<<<<<<< SEARCH
+        # Shrink radii if overlaps persist
+        for i in range(n):
+            for j in range(i+1, n):
+                dist = np.linalg.norm(centers[i] - centers[j])
+                if dist < radii[i] + radii[j] - 1e-6:
+                    radii[i] *= 0.98
+                    radii[j] *= 0.98
+=======
+        # Shrink radii more aggressively for persistent overlaps
+        for i in range(n):
+            for j in range(i+1, n):
+                dist = np.linalg.norm(centers[i] - centers[j])
+                min_dist = radii[i] + radii[j]
+                if dist < min_dist - 1e-6:
+                    # Compute overlap severity
+                    overlap = min_dist - dist
+                    # Shrink more if overlap is large
+                    shrink_factor = 0.95 if overlap > 0.02 else 0.98
+                    radii[i] *= shrink_factor
+                    radii[j] *= shrink_factor
+>>>>>>> REPLACE
+</DIFF>

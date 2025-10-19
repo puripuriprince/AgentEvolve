@@ -1,0 +1,115 @@
+<NAME>26_variable_radius_greedy_relax</NAME>
+<DESCRIPTION>
+Replace the fixed-radius, hex-seed approach with a robust variable-radius greedy placement followed by a short relaxation pass. The new function seeds radii with a center-heavy distribution, places circles on a coarse lattice in the unit square while enforcing non-overlap, and finally performs a lightweight relaxation to push circles apart and keep them inside boundaries. This aims to yield a valid 26-circle configuration with a higher effective sum of radii by leveraging variable sizes and edge effects.
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+def pack26_in_unit_square():
+    # baseline approach
+    positions = []
+    radii = []
+    # initialize with approx hex packing
+    for i in range(26):
+        radii.append(0.1)
+        positions.append((0.0, 0.0))
+    return
+=======
+def pack26_in_unit_square():
+    """
+    Variable-radius greedy packing for 26 circles in the unit square.
+    Uses a nonuniform radii distribution (center-heavy) and a coarse grid
+    to place circles while avoiding overlaps, followed by a short relaxation
+    to reduce overlaps and keep all circles inside the unit square.
+    Returns:
+        positions: list of (x, y) tuples
+        radii: list of radii
+    """
+    # Build a center-biased radii distribution for 26 circles
+    radii = []
+    for idx in range(26):
+        mid = 12.5
+        t = abs(idx - mid) / max(1.0, mid)
+        base = 0.14
+        r = base * (0.7 + 0.6 * (1.0 - t))
+        r = max(0.04, min(0.28, r))
+        radii.append(r)
+
+    # Create a coarse candidate lattice
+    grid_step = 0.03
+    candidate_positions = []
+    y = grid_step
+    while y <= 1.0 - grid_step:
+        x = grid_step
+        while x <= 1.0 - grid_step:
+            candidate_positions.append((x, y))
+            x += grid_step
+        y += grid_step
+
+    placed_positions = []
+    placed_radii = []
+    used = [False] * len(candidate_positions)
+
+    # Greedily place each circle at the first feasible candidate
+    for i, r in enumerate(radii):
+        placed = False
+        for j, (px, py) in enumerate(candidate_positions):
+            if used[j]:
+                continue
+            if px - r < 0 or py - r < 0 or px + r > 1 or py + r > 1:
+                continue
+            ok = True
+            for k, (qx, qy) in enumerate(placed_positions):
+                dist2 = (px - qx) ** 2 + (py - qy) ** 2
+                if dist2 < (r + placed_radii[k]) ** 2 - 1e-9:
+                    ok = False
+                    break
+            if ok:
+                placed_positions.append((px, py))
+                placed_radii.append(r)
+                used[j] = True
+                placed = True
+                break
+        # If no position found on the grid for this circle, skip for now
+        # (we'll fill later if needed)
+
+    # If fewer than 26 placed, fill remaining with small centers on edges
+    while len(placed_positions) < 26:
+        placed_positions.append((0.5, 0.5))
+        placed_radii.append(0.04)
+
+    # Short relaxation: push overlapping circles apart iteratively
+    for _ in range(60):
+        moved = False
+        for i in range(26):
+            xi, yi = placed_positions[i]
+            ri = placed_radii[i]
+            for j in range(26):
+                if i == j:
+                    continue
+                xj, yj = placed_positions[j]
+                rj = placed_radii[j]
+                dx = xi - xj
+                dy = yi - yj
+                d2 = dx * dx + dy * dy
+                if d2 <= 0:
+                    continue
+                d = d2 ** 0.5
+                min_d = ri + rj
+                if d < min_d:
+                    overlap = min_d - d
+                    ux = dx / d
+                    uy = dy / d
+                    xi += ux * overlap * 0.5
+                    yi += uy * overlap * 0.5
+                    placed_positions[i] = (xi, yi)
+                    moved = True
+        if not moved:
+            break
+        # clamp inside square
+        for i in range(26):
+            xi, yi = placed_positions[i]
+            ri = placed_radii[i]
+            xi = min(max(ri, xi), 1.0 - ri)
+            yi = min(max(ri, yi), 1.0 - ri)
+            placed_positions

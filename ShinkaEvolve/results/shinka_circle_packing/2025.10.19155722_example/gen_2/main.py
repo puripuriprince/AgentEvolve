@@ -1,0 +1,105 @@
+# EVOLVE-BLOCK-START
+"""Constructor-based circle packing for n=26 circles"""
+
+import numpy as np
+
+
+def construct_packing():
+    """
+    Construct a specific arrangement of 26 circles in a unit square
+    that attempts to maximize the sum of their radii.
+
+    Returns:
+        Tuple of (centers, radii, sum_of_radii)
+        centers: np.array of shape (26, 2) with (x, y) coordinates
+        radii: np.array of shape (26) with radius of each circle
+        sum_of_radii: Sum of all radii
+    """
+    # Initialize arrays for 26 circles
+    n = 26
+    centers = np.zeros((n, 2))
+
+    # Place circles in a structured pattern
+    # This is a simple pattern - evolution will improve this
+
+    # First, place a large circle in the center
+    centers[0] = [0.5, 0.5]
+
+    # Place 8 circles around it in a ring
+    for i in range(8):
+        angle = 2 * np.pi * i / 8
+        centers[i + 1] = [0.5 + 0.3 * np.cos(angle), 0.5 + 0.3 * np.sin(angle)]
+
+    # Place 16 more circles in an outer ring
+    for i in range(16):
+        angle = 2 * np.pi * i / 16
+        centers[i + 9] = [0.5 + 0.7 * np.cos(angle), 0.5 + 0.7 * np.sin(angle)]
+
+    # Additional positioning adjustment to make sure all circles
+    # are inside the square and don't overlap
+    # Clip to ensure everything is inside the unit square
+    centers = np.clip(centers, 0.01, 0.99)
+
+    # Compute maximum valid radii for this configuration
+    radii = compute_max_radii(centers)
+    return centers, radii
+
+
+def compute_max_radii(centers):
+    """
+    Radii computed via iterative relaxation to better exploit space
+    while preserving the no-overlap and border constraints.
+    """
+    n = centers.shape[0]
+    radii = np.ones(n)
+
+    # Initialize radii to respect borders
+    for i in range(n):
+        x, y = centers[i]
+        radii[i] = min(x, y, 1 - x, 1 - y)
+
+    max_iters = 40
+    for it in range(max_iters):
+        any_change = False
+
+        # Enforce border constraints
+        for i in range(n):
+            x, y = centers[i]
+            r_border = min(x, y, 1 - x, 1 - y)
+            if radii[i] > r_border:
+                radii[i] = r_border
+                any_change = True
+
+        # Enforce pairwise non-overlap constraints
+        for i in range(n):
+            for j in range(i + 1, n):
+                dx = centers[i, 0] - centers[j, 0]
+                dy = centers[i, 1] - centers[j, 1]
+                dist = (dx * dx + dy * dy) ** 0.5
+                if dist <= 0:
+                    continue
+                if radii[i] + radii[j] > dist:
+                    scale = dist / (radii[i] + radii[j])
+                    new_i = radii[i] * scale
+                    new_j = radii[j] * scale
+                    if new_i != radii[i] or new_j != radii[j]:
+                        radii[i] = new_i
+                        radii[j] = new_j
+                        any_change = True
+
+        if not any_change:
+            break
+
+    return radii
+
+
+# EVOLVE-BLOCK-END
+
+
+# This part remains fixed (not evolved)
+def run_packing():
+    """Run the circle packing constructor for n=26"""
+    centers, radii = construct_packing()
+    # Calculate the sum of radii
+    sum_radii = np.sum(radii)
+    return centers, radii, sum_radii

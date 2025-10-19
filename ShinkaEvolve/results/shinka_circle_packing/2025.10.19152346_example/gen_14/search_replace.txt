@@ -1,0 +1,53 @@
+<NAME>ring_radius_sweep</NAME>
+<DESCRIPTION>
+Implement a small deterministic parameter sweep over inner and outer ring radii (ring1, ring2) to select the combination that yields the largest total radii sum. This explores a local configuration space around the current fixed values and picks the best, enabling escape from suboptimal fixed ring distances.
+</DESCRIPTION>
+<DIFF>
+<<<<<<< SEARCH
+    # Tunable ring distances for flexible configuration
+    ring1 = 0.28  # inner ring radius
+    ring2 = 0.65  # outer ring radius
+
+    # Place 8 circles around it in an inner ring
+    for i in range(8):
+        angle = 2 * np.pi * i / 8
+        centers[i + 1] = [0.5 + ring1 * np.cos(angle), 0.5 + ring1 * np.sin(angle)]
+
+    # Place 17 circles in an outer ring
+    for i in range(17):
+        angle = 2 * np.pi * i / 17
+        centers[i + 9] = [0.5 + ring2 * np.cos(angle), 0.5 + ring2 * np.sin(angle)]
+
+    # Additional positioning adjustment to make sure all circles
+    # are inside the square and don't overlap
+    # Clip to ensure everything is inside the unit square
+    centers = np.clip(centers, 0.01, 0.99)
+
+    # Compute maximum valid radii for this configuration
+    radii = compute_max_radii(centers)
+    return centers, radii
+=======
+    # Parameter sweep for inner and outer ring radii
+    best_sum = 0
+    best_centers = None
+    best_radii = None
+    for ring1 in [0.26, 0.28, 0.30]:
+        for ring2 in [0.63, 0.65, 0.67]:
+            temp_centers = np.zeros((n, 2))
+            temp_centers[0] = [0.5, 0.5]
+            for i in range(8):
+                angle = 2 * np.pi * i / 8
+                temp_centers[i + 1] = [0.5 + ring1 * np.cos(angle), 0.5 + ring1 * np.sin(angle)]
+            for i in range(17):
+                angle = 2 * np.pi * i / 17
+                temp_centers[i + 9] = [0.5 + ring2 * np.cos(angle), 0.5 + ring2 * np.sin(angle)]
+            temp_centers = np.clip(temp_centers, 0.01, 0.99)
+            temp_radii = compute_max_radii(temp_centers)
+            sum_radii = np.sum(temp_radii)
+            if sum_radii > best_sum:
+                best_sum = sum_radii
+                best_centers = temp_centers
+                best_radii = temp_radii
+    return best_centers, best_radii
+>>>>>>> REPLACE
+</DIFF>

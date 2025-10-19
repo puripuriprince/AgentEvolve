@@ -1,0 +1,202 @@
+<NAME>
+initial_radii_variable_by_position_fix_indent
+</NAME>
+
+<DESCRIPTION>
+Fix indentation to match exactly the target code when replacing the block for initial placement and initial radii setup. Remove radii assignments after placement of circles and set initial radii only by compute_max_radii with initial shrink. This respects indentation and avoids search errors.
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+    for i in range(corner_weight):
+        centers[i] = corner_pos[i]
+        radii[i] = 0.08
+
+    # 2. Place 8 circles along edges (not at corners)
+    edge_offsets = np.linspace(0.22, 0.78, edge_weight//2)
+    idx = corner_weight
+    for x in edge_offsets:
+        centers[idx] = [x, 0.04]
+        centers[idx+1] = [x, 0.96]
+        radii[idx] = radii[idx+1] = 0.06
+        idx += 2
+
+    # 3. Place 6 circles in the center region (hex pattern)
+    center_hex = [
+        [0.5, 0.5],
+        [0.5+0.14, 0.5],
+        [0.5-0.14, 0.5],
+        [0.5, 0.5+0.14],
+        [0.5, 0.5-0.14],
+        [0.5+0.095, 0.5+0.095]
+    ]
+    for i in range(center_weight):
+        centers[idx] = center_hex[i]
+        radii[idx] = 0.10
+        idx += 1
+
+    # 4. Place 8 circles in an inner ring
+    ring_r = 0.33
+    for i in range(inner_ring_weight):
+        angle = 2 * np.pi * i / inner_ring_weight
+        centers[idx] = [0.5 + ring_r * np.cos(angle), 0.5 + ring_r * np.sin(angle)]
+        radii[idx] = 0.07
+        idx += 1
+
+    # Compute adaptive initial radii based on spacing
+    initial_shrink = 0.9
+    radii = compute_max_radii(centers) * initial_shrink
+
+    # 5. Small random perturbations to break symmetry
+    centers += np.random.uniform(-perturb_scale, perturb_scale, centers.shape)
+    centers = np.clip(centers, 0.01, 0.99)
+=======
+      for i in range(corner_weight):
+          centers[i] = corner_pos[i]
+
+      # 2. Place 8 circles along edges (not at corners)
+      edge_offsets = np.linspace(0.22, 0.78, edge_weight//2)
+      idx = corner_weight
+      for x in edge_offsets:
+          centers[idx] = [x, 0.04]
+          centers[idx+1] = [x, 0.96]
+          idx += 2
+
+      # 3. Place 6 circles in the center region (hex pattern)
+      center_hex = [
+          [0.5, 0.5],
+          [0.5+0.14, 0.5],
+          [0.5-0.14, 0.5],
+          [0.5, 0.5+0.14],
+          [0.5, 0.5-0.14],
+          [0.5+0.095, 0.5+0.095]
+      ]
+      for i in range(center_weight):
+          centers[idx] = center_hex[i]
+          idx += 1
+
+      # 4. Place 8 circles in an inner ring
+      ring_r = 0.33
+      for i in range(inner_ring_weight):
+          angle = 2 * np.pi * i / inner_ring_weight
+          centers[idx] = [0.5 + ring_r * np.cos(angle), 0.5 + ring_r * np.sin(angle)]
+          idx += 1
+
+      # Compute adaptive initial radii based on spacing (variable by position)
+      initial_shrink = 0.94
+      radii = compute_max_radii(centers) * initial_shrink
+
+      # 5. Small random perturbations to break symmetry
+      centers += np.random.uniform(-perturb_scale, perturb_scale, centers.shape)
+      centers = np.clip(centers, 0.01, 0.99)
+>>>>>>> REPLACE
+</DIFF>
+
+<NAME>
+adaptive_iters_early_stop_full_block
+</NAME>
+
+<DESCRIPTION>
+Replace the entire adaptive local optimization loop with the improved version that increases iterations to 40 with early stopping based on sum of radii improvement, variable per-circle shrink based on overlaps count, and added random reposition step every 10 iterations. This respects exact formatting to avoid search errors.
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+    # 6. Adaptive local optimization
+    for it in range(adaptive_iters):
+        # Recompute radii to maximize size without overlap or boundary violation
+        radii = compute_max_radii(centers)
+        # Nudge centers away from overlaps and boundaries
+        for i in range(n):
+            grad = np.zeros(2)
+            # Boundary repulsion
+            for d in range(2):
+                if centers[i, d] - radii[i] < 0.0:
+                    grad[d] += (0.01 - (centers[i, d] - radii[i])) * 0.5
+                if centers[i, d] + radii[i] > 1.0:
+                    grad[d] -= ((centers[i, d] + radii[i]) - 0.99) * 0.5
+            # Overlap repulsion
+            for j in range(n):
+                if i == j:
+                    continue
+                dist = np.linalg.norm(centers[i] - centers[j])
+                min_dist = radii[i] + radii[j]
+                if dist < min_dist - 1e-6:
+                    if dist > 1e-8:
+                        grad += (centers[i] - centers[j]) / dist * (min_dist - dist) * 0.15
+                    else:
+                        grad += np.random.uniform(-1, 1, 2) * 0.01
+            # Apply small step
+            centers[i] += grad * 0.25
+        # Clip to square
+        centers = np.clip(centers, 0.01, 0.99)
+        # If overlaps persist, shrink radii slightly
+        for i in range(n):
+            for j in range(i+1, n):
+                dist = np.linalg.norm(centers[i] - centers[j])
+                if dist < radii[i] + radii[j] - 1e-6:
+                    radii[i] *= shrink_factor
+                    radii[j] *= shrink_factor
+
+    # Final radii computation
+    radii = compute_max_radii(centers)
+=======
+    # 6. Adaptive local optimization
+    prev_sum = 0.0
+    tol = 1e-5
+    for it in range(adaptive_iters):
+        # Recompute radii to maximize size without overlap or boundary violation
+        radii = compute_max_radii(centers)
+        current_sum = np.sum(radii)
+        if current_sum - prev_sum < tol:
+            break
+        prev_sum = current_sum
+        # Nudge centers away from overlaps and boundaries
+        for i in range(n):
+            grad = np.zeros(2)
+            # Boundary repulsion
+            for d in range(2):
+                if centers[i, d] - radii[i] < 0.0:
+                    grad[d] += (0.01 - (centers[i, d] - radii[i])) * 0.5
+                if centers[i, d] + radii[i] > 1.0:
+                    grad[d] -= ((centers[i, d] + radii[i]) - 0.99) * 0.5
+            # Overlap repulsion
+            for j in range(n):
+                if i == j:
+                    continue
+                dist = np.linalg.norm(centers[i] - centers[j])
+                min_dist = radii[i] + radii[j]
+                if dist < min_dist - 1e-6:
+                    if dist > 1e-8:
+                        grad += (centers[i] - centers[j]) / dist * (min_dist - dist) * 0.15
+                    else:
+                        grad += np.random.uniform(-1, 1, 2) * 0.01
+            # Apply small step
+            centers[i] += grad * 0.40
+        # Clip to square
+        centers = np.clip(centers, 0.01, 0.99)
+
+        # Small random repositioning every 10 iterations to escape local minima
+        if (it + 1) % 10 == 0:
+            selected = np.random.choice(n, 3, replace=False)
+            perturb = 0.015
+            centers[selected] += np.random.uniform(-perturb, perturb, (3, 2))
+            centers = np.clip(centers, 0.01, 0.99)
+
+        # If overlaps persist, shrink radii slightly per circle based on number of overlaps
+        overlaps_count = np.zeros(n, dtype=int)
+        for i in range(n):
+            for j in range(i+1, n):
+                dist = np.linalg.norm(centers[i] - centers[j])
+                if dist < radii[i] + radii[j] - 1e-6:
+                    overlaps_count[i] += 1
+                    overlaps_count[j] += 1
+        for i in range(n):
+            # Shrink factor adjusted by number of overlaps, capped at 3 overlaps
+            factor = shrink_factor ** (min(overlaps_count[i], 3))
+            radii[i] *= factor
+
+    # Final radii computation
+    radii = compute_max_radii(centers)
+>>>>>>> REPLACE
+</DIFF>

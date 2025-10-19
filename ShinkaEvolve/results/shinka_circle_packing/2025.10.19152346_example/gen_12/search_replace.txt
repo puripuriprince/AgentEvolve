@@ -1,0 +1,185 @@
+<NAME>
+adaptive_initial_radii_based_on_local_density
+</NAME>
+
+<DESCRIPTION>
+Instead of using fixed radii patterns, initialize the radii based on local available space estimated from the minimum distance to neighbors and borders. This adaptive initialization reduces the need for excessive shrinking during the max radius computation and better reflects the local packing density. This approach leverages insight #2 and #4 by adapting initial radii to local geometry, potentially increasing the sum of radii.
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+    # Define radii for a centered large circle and smaller surrounding circles
+    radii_pattern = np.array([
+        0.2,  # Center large circle
+        0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,  # 8 smaller circles around center
+        0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05,  # 8 even smaller at outer ring
+        0.03, 0.03, 0.03, 0.03, 0.03, 0.03, 0.03, 0.03  # 8 smallest at outermost ring
+    ])
+
+    # Assign centers based on radii, positioning larger at center
+    centers[0] = [0.5, 0.5]
+
+    # Place 8 circles around the center
+    for i in range(8):
+        angle = 2 * np.pi * i / 8
+        radius_dist = 0.4  # distance from center for outer ring
+        centers[i + 1] = [0.5 + radius_dist * np.cos(angle), 0.5 + radius_dist * np.sin(angle)]
+
+    # Place 8 more circles in an outer ring
+    for i in range(8):
+        angle = 2 * np.pi * i / 8
+        radius_dist = 0.6  # further out
+        centers[i + 9] = [0.5 + radius_dist * np.cos(angle), 0.5 + radius_dist * np.sin(angle)]
+
+    # Place 8 smallest circles at the outermost positions
+    for i in range(8):
+        angle = 2 * np.pi * i / 8
+        radius_dist = 0.8
+        centers[i + 17] = [0.5 + radius_dist * np.cos(angle), 0.5 + radius_dist * np.sin(angle)]
+
+    # Additional positioning adjustment to make sure all circles
+    # are inside the square and don't overlap
+    # Clip to ensure everything is inside the unit square
+    centers = np.clip(centers, 0.01, 0.99)
+
+    # Compute maximum valid radii for this configuration
+    radii = compute_max_radii(centers)
+    return centers, radii
+=======
+    # Assign centers based on radii, positioning larger at center
+    centers[0] = [0.5, 0.5]
+
+    # Place 8 circles around the center
+    for i in range(8):
+        angle = 2 * np.pi * i / 8
+        radius_dist = 0.4  # distance from center for outer ring
+        centers[i + 1] = [0.5 + radius_dist * np.cos(angle), 0.5 + radius_dist * np.sin(angle)]
+
+    # Place 8 more circles in an outer ring
+    for i in range(8):
+        angle = 2 * np.pi * i / 8
+        radius_dist = 0.6  # further out
+        centers[i + 9] = [0.5 + radius_dist * np.cos(angle), 0.5 + radius_dist * np.sin(angle)]
+
+    # Place 8 smallest circles at the outermost positions
+    for i in range(8):
+        angle = 2 * np.pi * i / 8
+        radius_dist = 0.8
+        centers[i + 17] = [0.5 + radius_dist * np.cos(angle), 0.5 + radius_dist * np.sin(angle)]
+
+    # Additional positioning adjustment to make sure all circles
+    # are inside the square and don't overlap
+    # Clip to ensure everything is inside the unit square
+    centers = np.clip(centers, 0.01, 0.99)
+
+    # Adaptive initial radii based on local density estimation
+    n = centers.shape[0]
+    initial_radii = np.zeros(n)
+    for i in range(n):
+        x, y = centers[i]
+        # Distance to borders
+        dist_border = min(x, y, 1 - x, 1 - y)
+        # Distance to nearest neighbor
+        min_dist = 1.0
+        for j in range(n):
+            if i != j:
+                dist = np.linalg.norm(centers[i] - centers[j])
+                if dist < min_dist:
+                    min_dist = dist
+        # Set initial radius as half the minimum of border and neighbor distance
+        initial_radii[i] = 0.5 * min(dist_border, min_dist)
+    # Use initial radii as starting point for max radius computation
+    radii = compute_max_radii(centers, initial_radii)
+    return centers, radii
+>>>>>>> REPLACE
+
+</DIFF>
+
+<NAME>
+modify_compute_max_radii_to_accept_initial_radii
+</NAME>
+
+<DESCRIPTION>
+Modify the compute_max_radii function to accept an optional initial radii array, which allows starting from adaptive initial radii instead of uniform ones. This supports the adaptive initialization strategy and can improve convergence to a better packing.
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+def compute_max_radii(centers):
+    """
+    Compute the maximum possible radii for each circle position
+    such that they don't overlap and stay within the unit square.
+
+    Args:
+        centers: np.array of shape (n, 2) with (x, y) coordinates
+
+    Returns:
+        np.array of shape (n) with radius of each circle
+    """
+    n = centers.shape[0]
+    radii = np.ones(n)
+
+    # First, limit by distance to square borders
+    for i in range(n):
+        x, y = centers[i]
+        # Distance to borders
+        radii[i] = min(x, y, 1 - x, 1 - y)
+
+    # Then, limit by distance to other circles
+    # Each pair of circles with centers at distance d can have
+    # sum of radii at most d to avoid overlap
+    for i in range(n):
+        for j in range(i + 1, n):
+            dist = np.sqrt(np.sum((centers[i] - centers[j]) ** 2))
+
+            # If current radii would cause overlap
+            if radii[i] + radii[j] > dist:
+                # Scale both radii proportionally
+                scale = dist / (radii[i] + radii[j])
+                radii[i] *= scale
+                radii[j] *= scale
+
+    return radii
+=======
+def compute_max_radii(centers, initial_radii=None):
+    """
+    Compute the maximum possible radii for each circle position
+    such that they don't overlap and stay within the unit square.
+
+    Args:
+        centers: np.array of shape (n, 2) with (x, y) coordinates
+        initial_radii: optional np.array of shape (n) with initial radii guesses
+
+    Returns:
+        np.array of shape (n) with radius of each circle
+    """
+    n = centers.shape[0]
+    if initial_radii is None:
+        radii = np.ones(n)
+    else:
+        radii = initial_radii.copy()
+
+    # First, limit by distance to square borders
+    for i in range(n):
+        x, y = centers[i]
+        # Distance to borders
+        radii[i] = min(radii[i], x, y, 1 - x, 1 - y)
+
+    # Then, limit by distance to other circles
+    # Each pair of circles with centers at distance d can have
+    # sum of radii at most d to avoid overlap
+    for i in range(n):
+        for j in range(i + 1, n):
+            dist = np.sqrt(np.sum((centers[i] - centers[j]) ** 2))
+
+            # If current radii would cause overlap
+            if radii[i] + radii[j] > dist:
+                # Scale both radii proportionally
+                scale = dist / (radii[i] + radii[j])
+                radii[i] *= scale
+                radii[j] *= scale
+
+    return radii
+>>>>>>> REPLACE
+
+</DIFF>

@@ -1,0 +1,61 @@
+<NAME>
+shakeup_local_reopt
+</NAME>
+
+<DESCRIPTION>
+Introduce a global random "shake-up" step after the main adaptive optimization: randomly select a small subset of circles (3), reposition them randomly within feasible regions, and then perform a few local optimization steps. This can help the algorithm escape persistent local minima and discover denser configurations, as suggested by the benefit of random perturbations and the limitations of purely local moves. The shake-up is followed by a brief local optimization to allow the new configuration to settle.
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+    # Final radii computation
+    radii = compute_max_radii(centers)
+    return centers, radii
+=======
+    # Final radii computation
+    radii = compute_max_radii(centers)
+
+    # --- Global random shake-up step ---
+    # Randomly select 3 circles, reposition, and re-optimize locally
+    n_shake = 3
+    shake_indices = np.random.choice(n, n_shake, replace=False)
+    for idx in shake_indices:
+        # Randomly reposition within feasible region (avoid borders)
+        centers[idx] = np.random.uniform(0.08, 0.92, 2)
+    # Brief local optimization after shake-up
+    shake_iters = 6
+    for it in range(shake_iters):
+        radii = compute_max_radii(centers)
+        for i in range(n):
+            grad = np.zeros(2)
+            for d in range(2):
+                if centers[i, d] - radii[i] < 0.0:
+                    grad[d] += (0.01 - (centers[i, d] - radii[i])) * 0.5
+                if centers[i, d] + radii[i] > 1.0:
+                    grad[d] -= ((centers[i, d] + radii[i]) - 0.99) * 0.5
+            for j in range(n):
+                if i == j:
+                    continue
+                dist = np.linalg.norm(centers[i] - centers[j])
+                min_dist = radii[i] + radii[j]
+                if dist < min_dist - 1e-6:
+                    if dist > 1e-8:
+                        grad += (centers[i] - centers[j]) / dist * (min_dist - dist) * 0.15
+                    else:
+                        grad += np.random.uniform(-1, 1, 2) * 0.01
+            centers[i] += grad * 0.25
+        centers = np.clip(centers, 0.01, 0.99)
+        # Shrink radii if overlaps
+        for i in range(n):
+            for j in range(i+1, n):
+                dist = np.linalg.norm(centers[i] - centers[j])
+                if dist < radii[i] + radii[j] - 1e-6:
+                    radii[i] *= shrink_factor
+                    radii[j] *= shrink_factor
+
+    # Final radii computation after shake-up
+    radii = compute_max_radii(centers)
+    return centers, radii
+>>>>>>> REPLACE
+
+</DIFF>

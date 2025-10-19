@@ -1,0 +1,67 @@
+<NAME>iterative_relaxation_max_radii</NAME>
+<DESCRIPTION>
+Replace the single-pass overlap resolution in compute_max_radii with an iterative relaxation loop that continues until overlaps are minimized or a threshold is reached, for more accurate maximal radii.
+</DESCRIPTION>
+<DIFF>
+<<<<<<< SEARCH
+    # Then, limit by distance to other circles
+    # Each pair of circles with centers at distance d can have
+    # sum of radii at most d to avoid overlap
+    for i in range(n):
+        for j in range(i + 1, n):
+            dist = np.sqrt(np.sum((centers[i] - centers[j]) ** 2))
+
+            # If current radii would cause overlap
+            if radii[i] + radii[j] > dist:
+                # Scale both radii proportionally
+                scale = dist / (radii[i] + radii[j])
+                radii[i] *= scale
+                radii[j] *= scale
+
+    return radii
+=======
+    # Iterative relaxation to resolve overlaps with early stopping
+    max_iters = 10
+    eps = 1e-4
+    for _ in range(max_iters):
+        max_change = 0.0
+        for i in range(n):
+            for j in range(i + 1, n):
+                dist = np.linalg.norm(centers[i] - centers[j])
+                prev_i, prev_j = radii[i], radii[j]
+                if radii[i] + radii[j] > dist:
+                    scale = dist / (radii[i] + radii[j])
+                    radii[i] *= scale
+                    radii[j] *= scale
+                    change = max(abs(radii[i] - prev_i), abs(radii[j] - prev_j))
+                    if change > max_change:
+                        max_change = change
+        if max_change < eps:
+            break
+
+    return radii
+>>>>>>> REPLACE
+</DIFF>
+
+<NAME>random_perturbation_local_search</NAME>
+<DESCRIPTION>
+Add a local random perturbation phase after the parameter sweep to jitter the best solution and accept improvements, helping escape local minima.
+</DESCRIPTION>
+<DIFF>
+<<<<<<< SEARCH
+    return best_centers, best_radii
+=======
+    # Local random perturbation to escape local minima
+    perturb = 0.02
+    for _ in range(30):
+        temp_centers = best_centers + np.random.uniform(-perturb, perturb, best_centers.shape)
+        temp_centers = np.clip(temp_centers, 0.01, 0.99)
+        temp_radii = compute_max_radii(temp_centers)
+        sum_temp = np.sum(temp_radii)
+        if sum_temp > best_sum:
+            best_sum = sum_temp
+            best_centers = temp_centers
+            best_radii = temp_radii
+    return best_centers, best_radii
+>>>>>>> REPLACE
+</DIFF>

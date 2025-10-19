@@ -1,0 +1,119 @@
+# EVOLVE-BLOCK-START
+"""Layered, sector-based circle packing for n=26 circles in a unit square."""
+
+import numpy as np
+
+def place_corners(inset):
+    """Return 4 corner centers inset from each corner by 'inset'."""
+    return np.array([
+        [inset, inset],
+        [1 - inset, inset],
+        [1 - inset, 1 - inset],
+        [inset, 1 - inset]
+    ])
+
+def place_edges(edge_inset, edge_n, avoid_corners=True):
+    """Places 'edge_n' circles along the 4 edges, inset from the wall and (optionally) the corners."""
+    centers = []
+    # Edges: bottom, right, top, left (clockwise)
+    for (fixed_axis, fixed_val) in [(1, 0), (0, 1), (1, 1), (0, 0)]:
+        positions = np.linspace(edge_inset, 1 - edge_inset, edge_n + 2)[1:-1]  # avoid extreme points = corners
+        for pos in positions:
+            pt = [0,0]
+            pt[fixed_axis] = fixed_val if fixed_val in (0,1) else pos
+            pt[1-fixed_axis] = pos if fixed_val in (0,1) else fixed_val
+            centers.append(pt)
+    return np.array(centers)
+
+def place_ring(center, radius, n_points, theta_offset=0):
+    """Place n_points uniformly around a ring at given radius from center."""
+    return np.array([
+        [
+            center[0] + radius * np.cos(theta_offset + 2*np.pi*i/n_points),
+            center[1] + radius * np.sin(theta_offset + 2*np.pi*i/n_points)
+        ] for i in range(n_points)
+    ])
+
+def construct_packing():
+    """
+    Modular, layered arrangement of 26 circles in a unit square.
+
+    Returns:
+        Tuple of (centers, radii)
+        centers: np.array of shape (26, 2)
+        radii: np.array of shape (26,)
+    """
+    n = 26
+    layers = []
+
+    # 1. Center circle
+    layers.append(np.array([[0.5, 0.5]]))
+
+    # 2. Four corners, inset for maximal radius
+    corner_inset = 0.125
+    layers.append(place_corners(corner_inset))
+
+    # 3. Place 8 circles along edges, inset from both wall and corners
+    edge_inset = 0.13
+    edge_n = 2  # per edge (total 8)
+    layers.append(place_edges(edge_inset, edge_n=edge_n))
+
+    # 4. Place two rings:
+    #    - inner ring (6)
+    #    - mid ring (7)
+    #    - outer ring (so total = 1+4+8+6+7 = 26)
+    # Rings must be inside square and not overlap with edge/corner circles
+    ring_center = [0.5, 0.5]
+    ring_radii = [0.235, 0.36, 0.47]
+    ring_counts = [6, 7, 0]  # last ring filled below
+    current_total = sum(ring_counts) + 1 + 4 + 8
+    # Fill third ring with remaining
+    ring_counts[2] = n - (1 + 4 + 8 + ring_counts[0] + ring_counts[1])
+
+    # Add inner rings
+    for r, count in zip(ring_radii, ring_counts):
+        if count > 0:
+            theta_offset = (np.pi / count) if count > 1 else 0  # slight offset for better fill
+            layers.append(place_ring(ring_center, r, count, theta_offset=theta_offset))
+
+    # Stack all layers
+    centers = np.vstack(layers)
+
+    # Safety: ensure everything is inside the square
+    centers = np.clip(centers, 0.012, 0.988)
+
+    # Compute radii
+    radii = compute_max_radii_layered(centers)
+
+    return centers, radii
+
+def compute_max_radii_layered(centers):
+    """
+    Compute max possible radii for given centers: no overlap, all inside square.
+    """
+    n = centers.shape[0]
+    # Initial: distance to border
+    radii = np.array([min(x, y, 1-x, 1-y) for x,y in centers])
+
+    # Refine by pairwise distance constraint, iterative tightening
+    for _ in range(2):  # two passes for more fairness
+        for i in range(n):
+            for j in range(i+1, n):
+                dist = np.linalg.norm(centers[i] - centers[j])
+                if dist <= 1e-12:
+                    radii[i] = radii[j] = 0  # degenerate, should not happen
+                elif radii[i] + radii[j] > dist:
+                    # shrink both proportionally
+                    total = radii[i] + radii[j]
+                    scale = dist / total
+                    radii[i] *= scale
+                    radii[j] *= scale
+    return radii
+
+# EVOLVE-BLOCK-END
+
+def run_packing():
+    """Run the circle packing constructor for n=26"""
+    centers, radii = construct_packing()
+    sum_radii = np.sum(radii)
+    return centers, radii, sum_radii

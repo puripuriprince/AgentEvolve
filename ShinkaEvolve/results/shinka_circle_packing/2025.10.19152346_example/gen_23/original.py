@@ -1,0 +1,307 @@
+# EVOLVE-BLOCK-START
+"""Modular hybrid circle packing for n=26 circles with incremental local optimization"""
+
+import numpy as np
+
+
+def construct_packing():
+    """
+    Construct a specific arrangement of 26 circles in a unit square
+    aiming to maximize the sum of radii using a modular hybrid approach:
+    1) Initial structured placement with variable-sized groups to optimize space.
+    2) Compute maximum radii for initial placement.
+    3) Local gradient-based radius & position adjustment to resolve overlaps and increase radii.
+    4) Targeted pairwise swapping with recomputation to escape local minima.
+
+    Returns:
+        centers: ndarray (26,2) circle centers
+        radii: ndarray (26,) radii of circles
+    """
+
+    n = 26
+
+    # Step 1: Initial placement via constructor
+    centers = initial_placement(n)
+
+    # Step 2: Compute max radii with initial centers
+    radii = compute_max_radii(centers)
+
+    # Step 3: Local optimization to reduce overlaps & enhance radii
+    centers, radii = local_gradient_optimization(centers, radii, max_iters=150, tolerance=1e-5)
+
+    # Step 4: Hybrid swapping optimization to escape local minima
+    centers, radii = hybrid_swap_optimization(centers, radii, swaps=100)
+
+    return centers, radii
+
+
+def initial_placement(n):
+    """
+    Create an initial structured placement:
+    - 1 large center circle
+    - 8 medium circles forming an inner octagonal ring
+    - 17 smaller circles placed on edges and corners with variable spacing to optimize coverage
+
+    This placement separates circles into three logical groups to mirror known packing structures.
+    """
+
+    centers = np.zeros((n, 2))
+
+    # Center circle - largest
+    centers[0] = [0.5, 0.5]
+
+    # Inner ring of 8 circles around center (octagonal configuration)
+    inner_ring_radius = 0.27
+    for i in range(8):
+        angle = 2 * np.pi * i / 8
+        centers[i + 1] = [0.5 + inner_ring_radius * np.cos(angle),
+                          0.5 + inner_ring_radius * np.sin(angle)]
+
+    # Outer ring of 17 circles positioned with priority at corners and edges
+    # Corners get slightly larger spacing, edges get variable placement
+
+    # Define corner offsets to avoid overlap
+    corner_positions = np.array([
+        [0.05, 0.05], [0.05, 0.95], [0.95, 0.05], [0.95, 0.95]
+    ])
+
+    # Place corners first (4 circles)
+    centers[9:13] = corner_positions
+
+    # Remaining 13 circles distributed evenly on edges between corners
+    edge_positions = []
+    # Bottom edge (y=0.05)
+    bottom_xs = np.linspace(0.15, 0.85, 4)
+    for x in bottom_xs:
+        edge_positions.append([x, 0.05])
+    # Top edge (y=0.95)
+    top_xs = np.linspace(0.15, 0.85, 4)
+    for x in top_xs:
+        edge_positions.append([x, 0.95])
+    # Left edge (x=0.05)
+    left_ys = np.linspace(0.15, 0.85, 2)
+    for y in left_ys:
+        edge_positions.append([0.05, y])
+    # Right edge (x=0.95)
+    right_ys = np.linspace(0.15, 0.85, 3)
+    for y in right_ys:
+        edge_positions.append([0.95, y])
+
+    # Assign these 13 to centers[13:26]
+    centers[13:26] = np.array(edge_positions)
+
+    return centers
+
+
+def compute_max_radii(centers):
+    """
+    Compute the max radius per circle given centers, constrained by:
+    - Distance to unit square borders
+    - Distance to other circles, ensuring no overlaps
+
+    Method:
+    - Initialize radii limited by minimum distance to borders
+    - Iteratively scale radii pairwise if sum exceeds center distance
+
+    Args:
+        centers: (n,2) ndarray
+
+    Returns:
+        radii: (n,) ndarray with maximal radius per circle
+    """
+    n = centers.shape[0]
+    radii = np.zeros(n)
+
+    # Distance to borders for each circle center
+    dist_to_borders = np.minimum.reduce(
+        [centers[:, 0], centers[:, 1], 1 - centers[:, 0], 1 - centers[:, 1]]
+    )
+    radii[:] = dist_to_borders
+
+    # Iteratively adjust radii to avoid overlaps:
+    # Since adjusting one pair can influence others, repeat until stable or max iterations
+    max_iter = 100
+    for _ in range(max_iter):
+        changed = False
+        for i in range(n):
+            for j in range(i + 1, n):
+                center_dist = np.linalg.norm(centers[i] - centers[j])
+                if center_dist < 1e-14:
+                    # Practically same position - collapse radii to zero
+                    if radii[i] + radii[j] > 0:
+                        radii[i] = 0
+                        radii[j] = 0
+                        changed = True
+                    continue
+                if radii[i] + radii[j] > center_dist:
+                    # Scale both radii proportionally
+                    scale = center_dist / (radii[i] + radii[j])
+                    if scale < 1:
+                        radii_i_new = radii[i] * scale
+                        radii_j_new = radii[j] * scale
+                        if radii_i_new < radii[i]:
+                            radii[i] = radii_i_new
+                            changed = True
+                        if radii_j_new < radii[j]:
+                            radii[j] = radii_j_new
+                            changed = True
+        if not changed:
+            break
+
+    return radii
+
+
+def local_gradient_optimization(centers, radii, max_iters=150, tolerance=1e-5):
+    """
+    Iterative local optimization step to reduce overlaps and maximize radii:
+    - Move circles away from overlapping neighbors slightly
+    - Shrink radii adaptively if necessary
+    - Respect boundaries by clipping positions inside the square with a margin
+
+    Args:
+        centers: ndarray (n,2)
+        radii: ndarray (n,)
+        max_iters: max optimization steps
+        tolerance: terminate early if changes below this threshold
+
+    Returns:
+        centers, radii optimized
+    """
+
+    n = centers.shape[0]
+    margin = 1e-3
+    step_pos = 0.005  # position step size
+    shrink_factor = 0.98  # shrink multiplier when overlaps persist
+
+    for iteration in range(max_iters):
+        max_move = 0
+        # Compute pairwise distances and overlaps once per iteration for efficiency
+        diffs = centers[:, np.newaxis, :] - centers[np.newaxis, :, :]  # (n,n,2)
+        dists = np.linalg.norm(diffs, axis=2)
+        np.fill_diagonal(dists, np.inf)  # ignore self distance
+
+        # Gradient for position adjustment
+        move_vectors = np.zeros_like(centers)
+        for i in range(n):
+            overlap_vector = np.zeros(2)
+            for j in range(n):
+                if i == j:
+                    continue
+                dist_ij = dists[i, j]
+                if dist_ij < radii[i] + radii[j]:
+                    # Overlap amount
+                    overlap = radii[i] + radii[j] - dist_ij
+                    direction = diffs[i, j]
+                    if np.all(direction == 0):
+                        # Prevent zero vector division, perturb randomly
+                        direction = np.random.rand(2) - 0.5
+                    else:
+                        direction /= dist_ij
+                    overlap_vector += direction * overlap
+            move_vectors[i] = overlap_vector
+
+        # Normalize moves to prevent large jumps, scale by step_pos
+        norms = np.linalg.norm(move_vectors, axis=1, keepdims=True)
+        norms[norms == 0] = 1  # prevent divide by zero
+        discrete_moves = (move_vectors / norms) * step_pos
+
+        centers_new = centers + discrete_moves
+
+        # Enforce margin boundaries inside unit square
+        centers_new = np.clip(centers_new, margin, 1 - margin)
+
+        # Compute maximum radii for new positions
+        radii_new = compute_max_radii(centers_new)
+
+        # If radii improved sum or positions changed meaningfully, accept
+        sum_radii_before = np.sum(radii)
+        sum_radii_after = np.sum(radii_new)
+
+        move_magnitude = np.max(np.linalg.norm(centers_new - centers, axis=1))
+
+        if sum_radii_after >= sum_radii_before or move_magnitude > tolerance:
+            centers = centers_new
+            radii = radii_new
+            max_move = move_magnitude
+        else:
+            # No improvement - shrink radii slightly to help escape local overlaps
+            radii *= shrink_factor
+
+        # Early stop if improvements negligible
+        if max_move < tolerance and abs(sum_radii_after - sum_radii_before) < tolerance:
+            break
+
+    return centers, radii
+
+
+def hybrid_swap_optimization(centers, radii, swaps=100):
+    """
+    Hybrid optimization phase attempting pairwise swapping of circle positions
+    to escape local minima and enhance total radius sum.
+    Only attempts swaps of nearest neighbors for relevance.
+
+    Args:
+        centers: ndarray (n,2)
+        radii: ndarray (n,)
+        swaps: number of swap attempts
+
+    Returns:
+        Updated centers and radii with improved sum of radii if found
+    """
+    n = centers.shape[0]
+    best_centers = centers.copy()
+    best_radii = radii.copy()
+    best_sum = np.sum(radii)
+
+    # Precompute distance matrix once for neighbor selection
+    dists = np.linalg.norm(centers[:, np.newaxis, :] - centers[np.newaxis, :, :], axis=2)
+    np.fill_diagonal(dists, np.inf)
+
+    # For each circle find k nearest neighbors (k=4 chosen)
+    k = 4
+    nearest_neighbors = np.argsort(dists, axis=1)[:, :k]
+
+    for _ in range(swaps):
+        # Randomly select one circle i
+        i = np.random.randint(n)
+        # Random neighbor j from its nearest neighbors
+        j = np.random.choice(nearest_neighbors[i])
+
+        # Swap only if different circles
+        if i == j:
+            continue
+
+        # Create swapped centers copy
+        swapped_centers = centers.copy()
+        swapped_centers[i], swapped_centers[j] = centers[j], centers[i]
+
+        # Compute radii for swapped configuration
+        swapped_radii = compute_max_radii(swapped_centers)
+        swapped_sum = np.sum(swapped_radii)
+
+        # Accept swap if improvement
+        if swapped_sum > best_sum:
+            best_sum = swapped_sum
+            best_centers = swapped_centers
+            best_radii = swapped_radii
+            centers = swapped_centers
+            radii = swapped_radii
+
+            # Update distance matrix and neighbors since positions changed
+            dists = np.linalg.norm(centers[:, np.newaxis, :] - centers[np.newaxis, :, :], axis=2)
+            np.fill_diagonal(dists, np.inf)
+            nearest_neighbors = np.argsort(dists, axis=1)[:, :k]
+
+    return best_centers, best_radii
+
+
+# EVOLVE-BLOCK-END
+
+
+# This part remains fixed (not evolved)
+def run_packing():
+    """Run the circle packing constructor for n=26"""
+    centers, radii = construct_packing()
+    # Calculate the sum of radii
+    sum_radii = np.sum(radii)
+    return centers, radii, sum_radii

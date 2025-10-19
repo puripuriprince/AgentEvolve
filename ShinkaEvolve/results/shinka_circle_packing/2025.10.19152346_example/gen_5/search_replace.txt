@@ -1,0 +1,68 @@
+<NAME>
+hybrid_variable_radii_and_corner_placement
+</NAME>
+
+<DESCRIPTION>
+This edit introduces a hybrid packing approach combining a large central circle, two rings of circles with variable radii, and strategic placement of smaller circles in the four corners to better utilize edge space. The inner and outer ring radii are adjusted to optimize spacing and accommodate larger circles centrally, while smaller circles are placed near corners to reduce edge effects. This aligns with best practices in circle packing literature, which often uses hybrid arrangements with variable circle sizes and strategic corner placements to maximize total radius sum. The compute_max_radii function remains unchanged but benefits from this improved initial layout.
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+    # Place circles in a structured pattern
+    # This is a simple pattern - evolution will improve this
+
+    # First, place a large circle in the center
+    centers[0] = [0.5, 0.5]
+
+    # Tunable ring distances for flexible configuration
+    ring1 = 0.28  # inner ring radius
+    ring2 = 0.65  # outer ring radius
+
+    # Place 8 circles around it in an inner ring
+    for i in range(8):
+        angle = 2 * np.pi * i / 8
+        centers[i + 1] = [0.5 + ring1 * np.cos(angle), 0.5 + ring1 * np.sin(angle)]
+
+    # Place 17 circles in an outer ring
+    for i in range(17):
+        angle = 2 * np.pi * i / 17
+        centers[i + 9] = [0.5 + ring2 * np.cos(angle), 0.5 + ring2 * np.sin(angle)]
+
+    # Additional positioning adjustment to make sure all circles
+    # are inside the square and don't overlap
+    # Clip to ensure everything is inside the unit square
+    centers = np.clip(centers, 0.01, 0.99)
+=======
+    # Place circles in a structured pattern
+    # Hybrid approach: large center circle, two rings, and corner circles
+
+    # Large center circle
+    centers[0] = [0.5, 0.5]
+
+    # Tunable ring distances for flexible configuration
+    ring1 = 0.25  # inner ring radius (slightly smaller to allow bigger center)
+    ring2 = 0.62  # outer ring radius (adjusted for better packing)
+
+    # Place 8 circles around it in an inner ring
+    for i in range(8):
+        angle = 2 * np.pi * i / 8
+        centers[i + 1] = [0.5 + ring1 * np.cos(angle), 0.5 + ring1 * np.sin(angle)]
+
+    # Place 14 circles in an outer ring (reduced from 17 to allocate corners)
+    for i in range(14):
+        angle = 2 * np.pi * i / 14
+        centers[i + 9] = [0.5 + ring2 * np.cos(angle), 0.5 + ring2 * np.sin(angle)]
+
+    # Place 4 smaller circles in the corners to better use edges
+    corner_offset = 0.07
+    corners = np.array([
+        [corner_offset, corner_offset],
+        [1 - corner_offset, corner_offset],
+        [corner_offset, 1 - corner_offset],
+        [1 - corner_offset, 1 - corner_offset],
+    ])
+    centers[23:27] = corners[:4]
+
+    # Clip to ensure everything is inside the unit square
+    centers = np.clip(centers, 0.01, 0.99)
+>>>>>>> REPLACE

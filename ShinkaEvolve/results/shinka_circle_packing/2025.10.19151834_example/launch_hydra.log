@@ -1,0 +1,58 @@
+[2025-10-19 15:18:35,133][shinka.core.runner][INFO] - Experiment configuration saved to results/shinka_circle_packing/2025.10.19151834_example/experiment_config.yaml
+[2025-10-19 15:18:35,133][shinka.core.runner][INFO] - Starting evolution with 6 parallel jobs, target: 300 generations
+[2025-10-19 15:18:35,133][shinka.core.runner][INFO] - Running generation 0 sequentially to initialize database...
+[2025-10-19 15:18:46,535][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+[2025-10-19 15:18:46,556][shinka.database.dbase][INFO] - Program aa699d8c-846d-4a47-912c-c2c751f1c16a added to DB - score: 0.9597642169962064.
+[2025-10-19 15:18:46,557][shinka.database.dbase][INFO] - New best program: aa699d8c-846d-4a47-912c-c2c751f1c16a (gen: 0, score: 0.9598, initialized island: 0).
+[2025-10-19 15:18:46,557][shinka.database.dbase][INFO] - Not enough programs with embeddings (1) to perform clustering. Need at least 4.
+[2025-10-19 15:18:46,560][shinka.database.dbase][INFO] - Creating copies of initial program aa699d8c-846d-4a47-912c-c2c751f1c16a for all islands
+[2025-10-19 15:18:46,560][shinka.database.islands][INFO] - Created copy 81fd7b90... of program aa699d8c... for island 1
+[2025-10-19 15:18:46,561][shinka.database.islands][INFO] - Created copy 91fd4f9a... of program aa699d8c... for island 2
+[2025-10-19 15:18:46,562][shinka.database.islands][INFO] - Created copy fef2a4b1... of program aa699d8c... for island 3
+[2025-10-19 15:18:46,562][shinka.database.islands][INFO] - Created copy 180f0cf4... of program aa699d8c... for island 4
+[2025-10-19 15:18:46,562][shinka.database.islands][INFO] - Created 4 copies of program aa699d8c... for islands 1-4
+[2025-10-19 15:18:46,563][shinka.database.dbase][INFO] - Database state committed. Last iteration: 0. Best: aa699d8c-846d-4a47-912c-c2c751f1c16a
+[2025-10-19 15:18:46,566][shinka.core.summarizer][INFO] - Added program aa699d8c-846d-4a47-912c-c2c751f1c16a to meta memory tracking (correct=True, total: 1)
+[2025-10-19 15:18:46,569][shinka.core.summarizer][INFO] - Saved meta state to results/shinka_circle_packing/2025.10.19151834_example/meta_memory.json: 1 unprocessed programs, summary: No, scratchpad: No, recommendations: No, history: 0 items
+[2025-10-19 15:18:46,569][shinka.core.runner][INFO] - Completed generation 0, total: 1/300
+[2025-10-19 15:18:46,569][shinka.core.runner][INFO] - Starting parallel execution for remaining generations...
+[2025-10-19 15:18:46,570][shinka.database.parents][WARNING] - No archived programs found for weighted sampling.
+[2025-10-19 15:19:11,886][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+[2025-10-19 15:19:13,111][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+[2025-10-19 15:19:13,121][shinka.core.novelty_judge][INFO] - Top-5 similarity scores: ['0.92']
+[2025-10-19 15:19:13,122][shinka.core.novelty_judge][INFO] - NOVELTY CHECK 1/3: Accepting program due to low similarity (0.917 <= 1.0)
+[2025-10-19 15:19:15,140][shinka.database.parents][WARNING] - No archived programs found for weighted sampling.
+[2025-10-19 15:19:26,835][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+[2025-10-19 15:19:27,697][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+[2025-10-19 15:19:27,708][shinka.core.novelty_judge][INFO] - Top-5 similarity scores: ['0.93']
+[2025-10-19 15:19:27,708][shinka.core.novelty_judge][INFO] - NOVELTY CHECK 1/3: Accepting program due to low similarity (0.928 <= 1.0)
+[2025-10-19 15:19:29,744][shinka.database.dbase][INFO] - Program d7f71cc4-c79b-46c9-8966-edc243860e21 added to DB - score: 1.0087924302673295.
+[2025-10-19 15:19:29,745][shinka.database.dbase][INFO] - New best program: d7f71cc4-c79b-46c9-8966-edc243860e21 (gen: 0 → 1, score: 0.9598 → 1.0088, island: 0 → 2)
+[2025-10-19 15:19:29,747][shinka.database.dbase][INFO] - Recomputing PCA-reduced embedding features for 6 programs.
+[2025-10-19 15:19:53,844][shinka.database.dbase][INFO] - Successfully updated embedding features for 6 programs.
+[2025-10-19 15:19:53,847][shinka.core.summarizer][INFO] - Added program d7f71cc4-c79b-46c9-8966-edc243860e21 to meta memory tracking (correct=True, total: 2)
+[2025-10-19 15:19:53,848][shinka.database.dbase][INFO] - Database state committed. Last iteration: 1. Best: d7f71cc4-c79b-46c9-8966-edc243860e21
+[2025-10-19 15:19:53,860][shinka.core.summarizer][INFO] - Saved meta state to results/shinka_circle_packing/2025.10.19151834_example/meta_memory.json: 2 unprocessed programs, summary: No, scratchpad: No, recommendations: No, history: 0 items
+[2025-10-19 15:19:53,867][shinka.database.dbase][INFO] - Program 1a9e8789-8844-42c0-9e8f-1536d7ad70f2 added to DB - score: 0.0.
+[2025-10-19 15:19:53,868][shinka.database.dbase][INFO] - Recomputing PCA-reduced embedding features for 7 programs.
+[2025-10-19 15:19:54,639][shinka.database.dbase][INFO] - Successfully updated embedding features for 7 programs.
+[2025-10-19 15:19:54,641][shinka.core.summarizer][INFO] - Added program 1a9e8789-8844-42c0-9e8f-1536d7ad70f2 to meta memory tracking (correct=False, total: 3)
+[2025-10-19 15:19:54,641][shinka.database.dbase][INFO] - Database state committed. Last iteration: 2. Best: d7f71cc4-c79b-46c9-8966-edc243860e21
+[2025-10-19 15:19:54,651][shinka.core.summarizer][INFO] - Saved meta state to results/shinka_circle_packing/2025.10.19151834_example/meta_memory.json: 3 unprocessed programs, summary: No, scratchpad: No, recommendations: No, history: 0 items
+[2025-10-19 15:19:54,653][shinka.database.parents][WARNING] - No archived programs found for weighted sampling.
+[2025-10-19 15:19:54,678][botocore.credentials][INFO] - Found credentials in shared credentials file: ~/.aws/credentials
+[2025-10-19 15:19:55,977][httpx][INFO] - HTTP Request: POST https://bedrock-runtime.us-east-2.amazonaws.com/model/us.anthropic.claude-sonnet-4-20250514-v1:0/invoke "HTTP/1.1 403 Forbidden"
+[2025-10-19 15:19:55,980][backoff][INFO] - Backing off query_anthropic(...) for 0.2s (anthropic.PermissionDeniedError: Error code: 403 - {'Message': 'User: arn:aws:iam::018115330237:user/PFP is not authorized to perform: bedrock:InvokeModel on resource: arn:aws:bedrock:us-east-2:018115330237:inference-profile/us.anthropic.claude-sonnet-4-20250514-v1:0 because no identity-based policy allows the bedrock:InvokeModel action'})
+[2025-10-19 15:19:55,980][shinka.llm.models.anthropic][INFO] - Anthropic - Retry 1 due to error: Error code: 403 - {'Message': 'User: arn:aws:iam::018115330237:user/PFP is not authorized to perform: bedrock:InvokeModel on resource: arn:aws:bedrock:us-east-2:018115330237:inference-profile/us.anthropic.claude-sonnet-4-20250514-v1:0 because no identity-based policy allows the bedrock:InvokeModel action'}. Waiting 0.2s...
+[2025-10-19 15:19:56,257][httpx][INFO] - HTTP Request: POST https://bedrock-runtime.us-east-2.amazonaws.com/model/us.anthropic.claude-sonnet-4-20250514-v1:0/invoke "HTTP/1.1 403 Forbidden"
+[2025-10-19 15:19:56,259][backoff][INFO] - Backing off query_anthropic(...) for 0.3s (anthropic.PermissionDeniedError: Error code: 403 - {'Message': 'User: arn:aws:iam::018115330237:user/PFP is not authorized to perform: bedrock:InvokeModel on resource: arn:aws:bedrock:us-east-2:018115330237:inference-profile/us.anthropic.claude-sonnet-4-20250514-v1:0 because no identity-based policy allows the bedrock:InvokeModel action'})
+[2025-10-19 15:19:56,259][shinka.llm.models.anthropic][INFO] - Anthropic - Retry 2 due to error: Error code: 403 - {'Message': 'User: arn:aws:iam::018115330237:user/PFP is not authorized to perform: bedrock:InvokeModel on resource: arn:aws:bedrock:us-east-2:018115330237:inference-profile/us.anthropic.claude-sonnet-4-20250514-v1:0 because no identity-based policy allows the bedrock:InvokeModel action'}. Waiting 0.3s...
+[2025-10-19 15:19:56,617][httpx][INFO] - HTTP Request: POST https://bedrock-runtime.us-east-2.amazonaws.com/model/us.anthropic.claude-sonnet-4-20250514-v1:0/invoke "HTTP/1.1 403 Forbidden"
+[2025-10-19 15:19:56,619][backoff][INFO] - Backing off query_anthropic(...) for 3.9s (anthropic.PermissionDeniedError: Error code: 403 - {'Message': 'User: arn:aws:iam::018115330237:user/PFP is not authorized to perform: bedrock:InvokeModel on resource: arn:aws:bedrock:us-east-2:018115330237:inference-profile/us.anthropic.claude-sonnet-4-20250514-v1:0 because no identity-based policy allows the bedrock:InvokeModel action'})
+[2025-10-19 15:19:56,619][shinka.llm.models.anthropic][INFO] - Anthropic - Retry 3 due to error: Error code: 403 - {'Message': 'User: arn:aws:iam::018115330237:user/PFP is not authorized to perform: bedrock:InvokeModel on resource: arn:aws:bedrock:us-east-2:018115330237:inference-profile/us.anthropic.claude-sonnet-4-20250514-v1:0 because no identity-based policy allows the bedrock:InvokeModel action'}. Waiting 3.9s...
+[2025-10-19 15:20:00,603][httpx][INFO] - HTTP Request: POST https://bedrock-runtime.us-east-2.amazonaws.com/model/us.anthropic.claude-sonnet-4-20250514-v1:0/invoke "HTTP/1.1 403 Forbidden"
+[2025-10-19 15:20:00,604][backoff][INFO] - Backing off query_anthropic(...) for 6.4s (anthropic.PermissionDeniedError: Error code: 403 - {'Message': 'User: arn:aws:iam::018115330237:user/PFP is not authorized to perform: bedrock:InvokeModel on resource: arn:aws:bedrock:us-east-2:018115330237:inference-profile/us.anthropic.claude-sonnet-4-20250514-v1:0 because no identity-based policy allows the bedrock:InvokeModel action'})
+[2025-10-19 15:20:00,605][shinka.llm.models.anthropic][INFO] - Anthropic - Retry 4 due to error: Error code: 403 - {'Message': 'User: arn:aws:iam::018115330237:user/PFP is not authorized to perform: bedrock:InvokeModel on resource: arn:aws:bedrock:us-east-2:018115330237:inference-profile/us.anthropic.claude-sonnet-4-20250514-v1:0 because no identity-based policy allows the bedrock:InvokeModel action'}. Waiting 6.4s...
+[2025-10-19 15:20:07,208][httpx][INFO] - HTTP Request: POST https://bedrock-runtime.us-east-2.amazonaws.com/model/us.anthropic.claude-sonnet-4-20250514-v1:0/invoke "HTTP/1.1 403 Forbidden"
+[2025-10-19 15:20:07,209][backoff][INFO] - Backing off query_anthropic(...) for 7.3s (anthropic.PermissionDeniedError: Error code: 403 - {'Message': 'User: arn:aws:iam::018115330237:user/PFP is not authorized to perform: bedrock:InvokeModel on resource: arn:aws:bedrock:us-east-2:018115330237:inference-profile/us.anthropic.claude-sonnet-4-20250514-v1:0 because no identity-based policy allows the bedrock:InvokeModel action'})
+[2025-10-19 15:20:07,209][shinka.llm.models.anthropic][INFO] - Anthropic - Retry 5 due to error: Error code: 403 - {'Message': 'User: arn:aws:iam::018115330237:user/PFP is not authorized to perform: bedrock:InvokeModel on resource: arn:aws:bedrock:us-east-2:018115330237:inference-profile/us.anthropic.claude-sonnet-4-20250514-v1:0 because no identity-based policy allows the bedrock:InvokeModel action'}. Waiting 7.3s...

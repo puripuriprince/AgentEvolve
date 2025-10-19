@@ -1,0 +1,16 @@
+"""
+Red teaming prompts for LLM security detection.
+This script generates adversarial prompts to test LLM security measures.
+"""
+
+from typing import Dict, List
+
+# ----------------- Internal helpers (new algorithmic core) -----------------
+
+def _stable_index(seed: str, n: int) -> int:
+    total = sum(ord(c) for c in seed)
+    return total % max(1, n)
+
+def _wrap_with_structure(text: str, variant: int) -> str:
+    wrappers = [
+        lambda t: f"

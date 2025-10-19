@@ -1,0 +1,122 @@
+<NAME>
+pentagon_ring_perturbation_and_more_relaxation
+</NAME>
+
+<DESCRIPTION>
+The current arrangement uses a 5-circle pentagon for the second inner ring (indices 21-25), which can lead to inefficient use of space since a pentagon doesn't tesselate well with the prior diamond (square) ring and the corners/edges. To improve, we (1) switch this to a 6-circle hexagon, giving better symmetry and packing, and (2) apply mild random perturbation to the initial positions of both inner rings for symmetry breaking, (3) slightly increase the number of relaxation steps, and (4) use a slightly larger repulsion factor for overlap (to accelerate relaxation). These adjustments are based on hybrid-packing literature and empirical experience.
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+    # 21-25: Inner ring 2, 5 circles (pentagon), radius r2, offset for symmetry
+    r2 = 0.33
+    for k in range(5):
+        theta = 2*np.pi*k/5 + np.pi/10
+        centers[21+k] = [0.5 + r2 * np.cos(theta), 0.5 + r2 * np.sin(theta)]
+
+    # Now, iteratively relax the interior (indices 0, 17-25) for a few steps
+    # while freezing corners/edges (indices 1-16)
+    fixed = np.zeros(n, dtype=bool)
+    fixed[1:17] = True # center and two inner rings are movable
+
+    for relax_step in range(8):
+        radii = compute_max_radii_relax(centers)
+        grad = np.zeros_like(centers)
+
+        # For each movable circle, compute small repulsive force from overlaps, gentle push to center if near boundary
+        for i in range(n):
+            if fixed[i]:
+                continue
+            # Repulsion from other circles (if overlap/close)
+            for j in range(n):
+                if i == j:
+                    continue
+                # Only repel from circles that are "too close"
+                delta = centers[i] - centers[j]
+                dist = np.linalg.norm(delta)
+                min_dist = radii[i] + radii[j] + 1e-8
+                if dist < min_dist and dist > 1e-8:
+                    # Repulsive force, scaled by overlap amount
+                    force = (min_dist - dist) * (delta / (dist + 1e-8))
+                    grad[i] += force * 0.15  # 0.15 is a hand-tuned step
+            # Gentle push toward center if near square walls
+            cx, cy = centers[i]
+            border_push = 0.0
+            if cx < radii[i]+0.01:
+                grad[i,0] += (radii[i]+0.01-cx)*0.12
+            if cy < radii[i]+0.01:
+                grad[i,1] += (radii[i]+0.01-cy)*0.12
+            if cx > 1-(radii[i]+0.01):
+                grad[i,0] -= (cx-(1-(radii[i]+0.01)))*0.12
+            if cy > 1-(radii[i]+0.01):
+                grad[i,1] -= (cy-(1-(radii[i]+0.01)))*0.12
+        # Update positions (small step), but keep inside [0,1]
+        centers[~fixed] += grad[~fixed]
+        centers = np.clip(centers, 0.01, 0.99)
+
+    # Final radii computation after relaxation
+    radii = compute_max_radii_relax(centers)
+    return centers, radii
+=======
+    # 21-26: Inner ring 2, 6 circles (hexagon), radius r2, offset for symmetry
+    r2 = 0.336
+    rng = np.random.default_rng(seed=123)
+    for k in range(6):
+        theta = 2*np.pi*k/6 + np.pi/12
+        # Mild random perturbation to break symmetry
+        perturb = rng.uniform(-0.012, 0.012, 2)
+        centers[21+k] = [
+            np.clip(0.5 + r2 * np.cos(theta) + perturb[0], 0.01, 0.99),
+            np.clip(0.5 + r2 * np.sin(theta) + perturb[1], 0.01, 0.99),
+        ]
+
+    # Also perturb the inner ring 1 (diamond) slightly to help symmetry breaking
+    for k in range(4):
+        perturb = rng.uniform(-0.01, 0.01, 2)
+        centers[17+k] = np.clip(centers[17+k] + perturb, 0.01, 0.99)
+
+    # Now, iteratively relax the interior (indices 0, 17-26) for a few more steps
+    # while freezing corners/edges (indices 1-16)
+    fixed = np.zeros(n, dtype=bool)
+    fixed[1:17] = True # center and two inner rings are movable
+
+    for relax_step in range(12):
+        radii = compute_max_radii_relax(centers)
+        grad = np.zeros_like(centers)
+
+        # For each movable circle, compute small repulsive force from overlaps, gentle push to center if near boundary
+        for i in range(n):
+            if fixed[i]:
+                continue
+            # Repulsion from other circles (if overlap/close)
+            for j in range(n):
+                if i == j:
+                    continue
+                # Only repel from circles that are "too close"
+                delta = centers[i] - centers[j]
+                dist = np.linalg.norm(delta)
+                min_dist = radii[i] + radii[j] + 1e-8
+                if dist < min_dist and dist > 1e-8:
+                    # Repulsive force, scaled by overlap amount
+                    force = (min_dist - dist) * (delta / (dist + 1e-8))
+                    grad[i] += force * 0.18  # 0.18 is a slightly stronger step
+            # Gentle push toward center if near square walls
+            cx, cy = centers[i]
+            if cx < radii[i]+0.01:
+                grad[i,0] += (radii[i]+0.01-cx)*0.13
+            if cy < radii[i]+0.01:
+                grad[i,1] += (radii[i]+0.01-cy)*0.13
+            if cx > 1-(radii[i]+0.01):
+                grad[i,0] -= (cx-(1-(radii[i]+0.01)))*0.13
+            if cy > 1-(radii[i]+0.01):
+                grad[i,1] -= (cy-(1-(radii[i]+0.01)))*0.13
+        # Update positions (small step), but keep inside [0,1]
+        centers[~fixed] += grad[~fixed]
+        centers = np.clip(centers, 0.01, 0.99)
+
+    # Final radii computation after relaxation
+    radii = compute_max_radii_relax(centers)
+    return centers, radii
+>>>>>>> REPLACE
+
+</DIFF>

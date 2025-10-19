@@ -1,0 +1,73 @@
+<NAME>
+corner_edge_hybrid
+</NAME>
+
+<DESCRIPTION>
+The current arrangement uses two concentric rings, but the best-known results for n=26 circles in a square use a hybrid approach: one circle at the center, circles near the corners, and circles along the edges, with additional rings. The prior best solution places circles at the corners and edge centers, then fills rings in between. The outermost circles are not at the very edge/corner but slightly inset. This arrangement is more flexible and fits larger circles.
+
+This edit proposes a hybrid:
+- Place the center circle.
+- Place 4 circles near the corners (but not exactly at the corner).
+- Place 4 at the edge centers.
+- Place 8 in an inner ring (octagon).
+- Place 9 in an outer ring (nonagon, slightly inset).
+This closely models the best-known manual construction and likely improves the combined score.
+
+The radii are computed as before, but the new structure will allow for larger sum of radii.
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+    # Place circles in a structured pattern
+    # This is a simple pattern - evolution will improve this
+
+    # First, place a large circle in the center
+    centers[0] = [0.5, 0.5]
+
+    # Place 8 circles around it in a ring
+    for i in range(8):
+        angle = 2 * np.pi * i / 8
+        centers[i + 1] = [0.5 + 0.3 * np.cos(angle), 0.5 + 0.3 * np.sin(angle)]
+
+    # Place 16 more circles in an outer ring
+    for i in range(16):
+        angle = 2 * np.pi * i / 16
+        centers[i + 9] = [0.5 + 0.7 * np.cos(angle), 0.5 + 0.7 * np.sin(angle)]
+
+    # Additional positioning adjustment to make sure all circles
+    # are inside the square and don't overlap
+    # Clip to ensure everything is inside the unit square
+    centers = np.clip(centers, 0.01, 0.99)
+=======
+    # Hybrid geometric placement:
+    # 0: Center
+    centers[0] = [0.5, 0.5]
+    # 1-4: Corners (slightly inset)
+    inset = 0.03
+    centers[1] = [inset, inset]
+    centers[2] = [1 - inset, inset]
+    centers[3] = [1 - inset, 1 - inset]
+    centers[4] = [inset, 1 - inset]
+    # 5-8: Edge centers
+    centers[5] = [0.5, inset]
+    centers[6] = [1 - inset, 0.5]
+    centers[7] = [0.5, 1 - inset]
+    centers[8] = [inset, 0.5]
+
+    # 9-16: First ring (inner, octagon-like)
+    ring1_r = 0.24  # radius for inner ring, adjustable
+    for i in range(8):
+        angle = np.pi/8 + 2 * np.pi * i / 8  # slight offset to avoid alignment with edge centers
+        centers[9 + i] = [0.5 + ring1_r * np.cos(angle), 0.5 + ring1_r * np.sin(angle)]
+
+    # 17-25: Outer ring (nonagon, slightly inset)
+    ring2_r = 0.47  # radius for outer ring, not all the way to edge
+    for i in range(9):
+        angle = 2 * np.pi * i / 9
+        cx = 0.5 + ring2_r * np.cos(angle)
+        cy = 0.5 + ring2_r * np.sin(angle)
+        # Clamp to keep inside [0.01, 0.99]
+        centers[17 + i] = [min(max(cx, 0.01), 0.99), min(max(cy, 0.01), 0.99)]
+>>>>>>> REPLACE
+
+</DIFF>

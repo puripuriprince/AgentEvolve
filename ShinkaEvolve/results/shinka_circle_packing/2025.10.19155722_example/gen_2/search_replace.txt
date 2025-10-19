@@ -1,0 +1,94 @@
+<NAME>
+iterative-relaxation-radii-v3
+</NAME>
+
+<DESCRIPTION>
+Implement a robust multi-iteration relaxation for radii computation. This version starts with border-constrained radii and repeatedly enforces border and pairwise non-overlap constraints across multiple iterations with convergence checks. The approach tends to yield larger feasible radii than a single-pass scaling, improving the sum of radii for the given fixed centers. It remains backward-compatible in terms of interface and usage within the existing code.
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+def compute_max_radii(centers):
+    """
+    Compute the maximum possible radii for each circle position
+    such that they don't overlap and stay within the unit square.
+
+    Args:
+        centers: np.array of shape (n, 2) with (x, y) coordinates
+
+    Returns:
+        np.array of shape (n) with radius of each circle
+    """
+    n = centers.shape[0]
+    radii = np.ones(n)
+
+    # First, limit by distance to square borders
+    for i in range(n):
+        x, y = centers[i]
+        # Distance to borders
+        radii[i] = min(x, y, 1 - x, 1 - y)
+
+    # Then, limit by distance to other circles
+    # Each pair of circles with centers at distance d can have
+    # sum of radii at most d to avoid overlap
+    for i in range(n):
+        for j in range(i + 1, n):
+            dist = np.sqrt(np.sum((centers[i] - centers[j]) ** 2))
+
+            # If current radii would cause overlap
+            if radii[i] + radii[j] > dist:
+                # Scale both radii proportionally
+                scale = dist / (radii[i] + radii[j])
+                radii[i] *= scale
+                radii[j] *= scale
+
+    return radii
+=======
+def compute_max_radii(centers):
+    """
+    Radii computed via iterative relaxation to better exploit space
+    while preserving the no-overlap and border constraints.
+    """
+    n = centers.shape[0]
+    radii = np.ones(n)
+
+    # Initialize radii to respect borders
+    for i in range(n):
+        x, y = centers[i]
+        radii[i] = min(x, y, 1 - x, 1 - y)
+
+    max_iters = 40
+    for it in range(max_iters):
+        any_change = False
+
+        # Enforce border constraints
+        for i in range(n):
+            x, y = centers[i]
+            r_border = min(x, y, 1 - x, 1 - y)
+            if radii[i] > r_border:
+                radii[i] = r_border
+                any_change = True
+
+        # Enforce pairwise non-overlap constraints
+        for i in range(n):
+            for j in range(i + 1, n):
+                dx = centers[i, 0] - centers[j, 0]
+                dy = centers[i, 1] - centers[j, 1]
+                dist = (dx * dx + dy * dy) ** 0.5
+                if dist <= 0:
+                    continue
+                if radii[i] + radii[j] > dist:
+                    scale = dist / (radii[i] + radii[j])
+                    new_i = radii[i] * scale
+                    new_j = radii[j] * scale
+                    if new_i != radii[i] or new_j != radii[j]:
+                        radii[i] = new_i
+                        radii[j] = new_j
+                        any_change = True
+
+        if not any_change:
+            break
+
+    return radii
+>>>>>>> REPLACE
+</DIFF>

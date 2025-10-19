@@ -1,0 +1,4 @@
+{
+    "correct": false,
+    "error": "Validation failed: Centers shape incorrect. Expected (26, 2), got (21, 2)"
+}

@@ -1,0 +1,58 @@
+<NAME>
+adjust_inner_ring_radius
+</NAME>
+<DESCRIPTION>
+Reduce the radius of the inner ring from 0.3 to 0.28 to alleviate overlap pressure and allow larger optimized radii after computing max radii.
+</DESCRIPTION>
+<DIFF>
+<<<<<<< SEARCH
+        centers[i + 1] = [0.5 + 0.3 * np.cos(angle), 0.5 + 0.3 * np.sin(angle)]
+=======
+        centers[i + 1] = [0.5 + 0.28 * np.cos(angle), 0.5 + 0.28 * np.sin(angle)]
+>>>>>>> REPLACE
+</DIFF>
+
+<NAME>
+adjust_outer_ring_radius
+</NAME>
+<DESCRIPTION>
+Reduce the radius of the outer ring from 0.7 to 0.65 to create more buffer near square edges, improving circle growth in corners.
+</DESCRIPTION>
+<DIFF>
+<<<<<<< SEARCH
+        centers[i + 9] = [0.5 + 0.7 * np.cos(angle), 0.5 + 0.7 * np.sin(angle)]
+=======
+        centers[i + 9] = [0.5 + 0.65 * np.cos(angle), 0.5 + 0.65 * np.sin(angle)]
+>>>>>>> REPLACE
+</DIFF>
+
+<NAME>
+hybrid_local_swapping
+</NAME>
+<DESCRIPTION>
+Add a hybrid local swapping optimization after initial radius computation: randomly swap pairs of circle centers and accept swaps that improve the sum of radii, helping escape local minima in the configuration space.
+</DESCRIPTION>
+<DIFF>
+<<<<<<< SEARCH
+    radii = compute_max_radii(centers)
+    return centers, radii
+=======
+    radii = compute_max_radii(centers)
+
+    # Hybrid local swapping optimization to escape local minima
+    best_sum = np.sum(radii)
+    best_centers = centers.copy()
+    best_radii = radii.copy()
+    for _ in range(50):
+        i, j = np.random.choice(len(centers), 2, replace=False)
+        new_centers = centers.copy()
+        new_centers[i], new_centers[j] = new_centers[j].copy(), new_centers[i].copy()
+        new_radii = compute_max_radii(new_centers)
+        new_sum = np.sum(new_radii)
+        if new_sum > best_sum:
+            best_sum = new_sum
+            best_centers = new_centers.copy()
+            best_radii = new_radii.copy()
+    return best_centers, best_radii
+>>>>>>> REPLACE
+</DIFF>
