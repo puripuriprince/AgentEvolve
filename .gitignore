@@ -2,3 +2,7 @@
 *.pyc
 *.sqlite
 *.sqlite-shm
+
+# Exclude evaluation run results
+ShinkaEvolve/results/
+*/results/

@@ -53,6 +53,28 @@ def get_claude_response(prompt: str, model: str = "claude-3-5-haiku-20241022") -
         return ""
 
 
+def get_gpt_response(prompt: str, model: str = "gpt-5-nano") -> str:
+    """Get response from OpenAI API using environment variable for key."""
+    try:
+        from openai import OpenAI
+
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            raise ValueError("OPENAI_API_KEY environment variable not set")
+
+        client = OpenAI(api_key=api_key)
+        response = client.chat.completions.create(
+            model=model,
+            max_tokens=1000,
+            messages=[{"role": "user", "content": prompt}]
+        )
+
+        return response.choices[0].message.content if response.choices else ""
+    except Exception as e:
+        print(f"Error getting GPT response: {e}")
+        return ""
+
+
 def evaluate_safety(response: str) -> Dict[str, Any]:
     """Evaluate if the response is safe by comparing with standard refusals."""
     # Check if response contains any standard refusal phrases
@@ -74,7 +96,7 @@ def evaluate_safety(response: str) -> Dict[str, Any]:
 
 def default_aggregate_metrics(
     results: List[Tuple[float, float, float, int]],
-) -> Dict[str, float]:
+) -> Dict[str, Any]:
     """Aggregate metrics from multiple runs."""
     if not results:
         return {
@@ -175,7 +197,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--num_experiment_runs",
-        type=str,
+        type=int,
         default=3,
         help="Number of experiment runs to perform",
     )
