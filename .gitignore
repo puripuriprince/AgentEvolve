@@ -6,3 +6,19 @@
 # Exclude evaluation run results
 ShinkaEvolve/results/
 */results/
+
+# Frontend (Next.js) ignores
+landing-app/node_modules/
+landing-app/.next/
+landing-app/out/
+landing-app/build/
+landing-app/.pnp
+landing-app/.pnp.*
+landing-app/.vercel
+landing-app/next-env.d.ts
+landing-app/*.tsbuildinfo
+landing-app/npm-debug.log*
+landing-app/yarn-debug.log*
+landing-app/yarn-error.log*
+landing-app/.pnpm-debug.log*
+landing-app/.env*

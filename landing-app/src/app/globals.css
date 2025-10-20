@@ -1,0 +1,194 @@
+@import "tailwindcss";
+
+/* Font: Exo 2 via next/font (see layout.tsx) */
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  /* Linear-inspired tokens (light) */
+  --surface: 0 0% 98%;
+  --text-primary: 0 0% 10%;
+  --text-secondary: 0 0% 45%;
+  --text-tertiary: 0 0% 65%;
+  --border-default: 0 0% 90%;
+  --border-muted: 0 0% 95%;
+  --accent: 250 100% 60%;
+  /* Global gradient intensity (0–1) */
+  --gradient-alpha: 0.15;
+  /* Animated opacity of gradient layer (0 to 1 on first load) */
+  --gradient-opa: 0;
+  /* Vignette tuning (simple global controls) */
+  --wrap-spread-x: 1.8;        /* horizontal multiplier */
+  --wrap-spread-y: 1.6;        /* vertical multiplier */
+  --vignette-inner: 10%;       /* start fade near center */
+  --vignette-mid: 20%;         /* mid fade position */
+  --vignette-outer: 65%;       /* outer edge of fade */
+  --vignette-alpha-mid: 0.08;  /* mid opacity */
+  --vignette-alpha-max: 1.0;  /* max opacity at outer */
+  /* Safe minimums for vignette geometry and stops */
+  --min-wrap-rx: 100%;
+  --min-wrap-ry: 10%;
+  --max-wrap-rx: 100%;
+  --max-wrap-ry: 90%;
+  --min-vignette-inner: 8%;
+  --min-vignette-mid: 15%;
+  --max-vignette-outer: 99%;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  /* Font family provided by next/font through --font-sans */
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+    /* Linear-inspired tokens (dark) */
+    --surface: 0 0% 6%;
+    --text-primary: 0 0% 98%;
+    --text-secondary: 0 0% 65%;
+    --text-tertiary: 0 0% 45%;
+    --border-default: 0 0% 15%;
+    --border-muted: 0 0% 10%;
+  }
+}
+
+html, body { width: 100%; height: 100%; }
+
+body {
+  /* Animated multi-stop gradient as the global background */
+  background:
+    linear-gradient(
+      -45deg,
+      hsl(14 82% 64% / calc(var(--gradient-alpha) * var(--gradient-opa))),   /* #ee7752 */
+      hsl(333 79% 58% / calc(var(--gradient-alpha) * var(--gradient-opa))),  /* #e73c7e */
+      hsl(197 68% 49% / calc(var(--gradient-alpha) * var(--gradient-opa))),  /* #23a6d5 */
+      hsl(164 66% 49% / calc(var(--gradient-alpha) * var(--gradient-opa)))   /* #23d5ab */
+    ),
+    var(--background);
+  background-size: 200% 200%, auto;
+  animation: gradient 15s ease infinite;
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+/* Mesh gradient sections */
+.mesh-section {
+  position: relative;
+  overflow: hidden;
+  padding: 3.75rem 1.5rem; /* slightly increased spacing */
+  isolation: isolate; /* ensure ::after stacks relative to content */
+}
+
+/* Global minimal veil to guarantee soft top/side fades (independent of dynamic vignette) */
+.mesh-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2; /* below ::after vignette */
+  pointer-events: none;
+  /* Subtle top + side veils; tune px as needed */
+  background:
+    /* Top fade */
+    linear-gradient(to bottom, rgba(0,0,0,0.24), rgba(0,0,0,0) 100px),
+    /* Side fades */
+    linear-gradient(to right,
+      rgba(0,0,0,0.12), rgba(0,0,0,0) 80px,
+      rgba(0,0,0,0) calc(100% - 80px), rgba(0,0,0,0.12)
+    );
+}
+
+.mesh-section::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1; /* default: under content so text stays clear */
+  pointer-events: none;
+  /* Dark vignette that fades outward from the content area and at section edges */
+  background:
+    radial-gradient(
+      ellipse clamp(var(--min-wrap-rx), var(--wrap-rx, 85%), var(--max-wrap-rx))
+              clamp(var(--min-wrap-ry), var(--wrap-ry, 48%), var(--max-wrap-ry))
+      at var(--wrap-x, 50%) var(--wrap-y, 50%),
+      rgba(0,0,0,0.00) max(var(--min-vignette-inner), var(--vignette-inner, 15%)),
+      rgba(0,0,0,var(--vignette-alpha-mid, 0.10)) max(var(--min-vignette-mid), var(--vignette-mid, 65%)),
+      rgba(0,0,0,var(--vignette-alpha-max, 0.35)) min(var(--max-vignette-outer), var(--vignette-outer, 92%))
+    ),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.18) 0%, rgba(0, 0, 0, 0.0) 18%, rgba(0, 0, 0, 0.0) 82%, rgba(0, 0, 0, 0.18) 100%),
+    linear-gradient(to right, rgba(0, 0, 0, 0.12) 0%, rgba(0, 0, 0, 0.0) 18%, rgba(0, 0, 0, 0.0) 82%, rgba(0, 0, 0, 0.12) 100%);
+}
+
+/* Toggle: bring overlay above content when desired */
+.mesh-section.overlay-over::after,
+.mesh-section[data-clear-text="false"]::after {
+  z-index: 0;
+}
+
+/* Variants */
+.mesh-a::before { content: none; }
+
+.mesh-b::before { content: none; }
+
+.mesh-c::before { content: none; }
+
+/* Interactive hue shift runs only when section is in view */
+/* Allow hue rotation; only adjust when in view via animation classes */
+/* No filter override here to preserve hue-rotate from --mesh-hue */
+
+/* Animated background movement */
+/* Simple background animation (global) */
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@property --gradient-opa {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
+@keyframes gradientAlphaIn {
+  0% { --gradient-opa: 0; }
+  100% { --gradient-opa: 1; }
+}
+
+/* Remove hue rotation utilities */
+.mesh-hue-soft { animation: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .mesh-hue-soft { animation: none; }
+}
+
+/* Lightweight utility classes mapping tokens without changing Tailwind config */
+.bg-surface { background-color: hsl(var(--surface)); }
+.text-muted-foreground { color: hsl(var(--text-secondary)); }
+.text-tertiary { color: hsl(var(--text-tertiary)); }
+.text-accent { color: hsl(var(--accent)); }
+.bg-accent { background-color: hsl(var(--accent)); }
+.border-border-muted { border-color: hsl(var(--border-muted)); }
+.border-border-default { border-color: hsl(var(--border-default)); }
+
+/* Utility: hide a very thin strip from the top of an element (e.g., videos) */
+/* Utility: crop a thin strip from all sides without affecting layout */
+.crop-edge {
+  --trim: 2px;
+  clip-path: inset(var(--trim));
+}
+
+/* Linear-style card base (optional utility) */
+.linear-card {
+  background: hsl(var(--surface));
+  border: 1px solid hsl(var(--border-muted));
+  border-radius: 12px;
+  padding: 24px;
+  transition: border-color 0.2s ease;
+}
+.linear-card:hover { border-color: hsl(var(--border-default)); }
+
+/* Recharts: prevent tooltip from sliding/animating on position updates */
+.recharts-tooltip-wrapper { transition: none !important; }
