@@ -1,0 +1,106 @@
+# EVOLVE-BLOCK-START
+"""Hybrid arrangement with center-edge-corner gradient for n=26 circles"""
+
+import numpy as np
+
+def construct_packing():
+    """
+    Construct a refined arrangement of 26 circles in a unit square,
+    now with a large center, a 12-point hexagonal outer ring,
+    strategic edge/corner/interstitial placements for the rest.
+
+    Returns:
+        Tuple of (centers, radii)
+        centers: np.array of shape (26, 2) with (x, y) coordinates
+        radii: np.array of shape (26) with radius of each circle
+    """
+    n = 26
+    centers = np.zeros((n, 2))
+
+    # 0: large center
+    centers[0] = [0.5, 0.5]
+    # 1-4: edge centers (midpoints of edges)
+    centers[1] = [0.5, 0.06]
+    centers[2] = [0.94, 0.5]
+    centers[3] = [0.5, 0.94]
+    centers[4] = [0.06, 0.5]
+    # 5-8: corners
+    centers[5] = [0.06, 0.06]
+    centers[6] = [0.94, 0.06]
+    centers[7] = [0.94, 0.94]
+    centers[8] = [0.06, 0.94]
+
+    # 9-20: 12-point "outer" hexagonal ring (radius ~0.41)
+    ring_r = 0.41
+    ring_offset = np.pi/12
+    for i in range(12):
+        angle = 2 * np.pi * i / 12 + ring_offset
+        centers[9 + i] = [0.5 + ring_r * np.cos(angle), 0.5 + ring_r * np.sin(angle)]
+    # 21-24: four face-diagonal interstitials, at 1/4,3/4 between center and corners
+    diag_1_4 = 0.5 + 0.25 * (np.array([[-1, -1], [1, -1], [1, 1], [-1, 1]]))
+    diag_3_4 = 0.5 + 0.75 * (np.array([[-1, -1], [1, -1], [1, 1], [-1, 1]]))
+    centers[21] = diag_1_4[0]
+    centers[22] = diag_1_4[2]
+    centers[23] = diag_3_4[1]
+    centers[24] = diag_3_4[3]
+    # 25: edge-interstitial (center of top edge)
+    centers[25] = [0.5, 0.79]
+
+    # Slightly move points inside if at the border
+    centers = np.clip(centers, 0.013, 0.987)
+
+    # Compute maximal radii
+    radii = compute_max_radii_iterative(centers)
+    return centers, radii
+
+def compute_max_radii_iterative(centers, max_iters=50, tol=1e-8):
+    """
+    Iteratively compute maximal radii so that circles don't overlap or exit the unit square.
+    Uses a pairwise min procedure and iterative tightening.
+
+    Args:
+        centers: np.array (n, 2)
+        max_iters: int, number of iterations for tightening
+        tol: convergence tolerance
+
+    Returns:
+        radii: np.array (n,)
+    """
+    n = centers.shape[0]
+    radii = np.ones(n)
+    # Border constraint
+    for i in range(n):
+        x, y = centers[i]
+        radii[i] = min(x, y, 1-x, 1-y)
+    # Iterative tightening for overlaps
+    for _ in range(max_iters):
+        prev = radii.copy()
+        for i in range(n):
+            for j in range(i+1, n):
+                dist = np.linalg.norm(centers[i]-centers[j])
+                if dist < 1e-8:
+                    # If two centers are coincident, force radii to nearly zero
+                    radii[i] = min(radii[i], 1e-4)
+                    radii[j] = min(radii[j], 1e-4)
+                elif radii[i] + radii[j] > dist:
+                    # Reduce both radii proportionally to avoid overlap
+                    excess = (radii[i] + radii[j]) - dist
+                    share = 0.5 * excess
+                    radii[i] -= share
+                    radii[j] -= share
+                    radii[i] = max(radii[i], 1e-6)
+                    radii[j] = max(radii[j], 1e-6)
+        if np.max(np.abs(radii - prev)) < tol:
+            break
+    return radii
+
+# EVOLVE-BLOCK-END
+
+
+# This part remains fixed (not evolved)
+def run_packing():
+    """Run the circle packing constructor for n=26"""
+    centers, radii = construct_packing()
+    # Calculate the sum of radii
+    sum_radii = np.sum(radii)
+    return centers, radii, sum_radii

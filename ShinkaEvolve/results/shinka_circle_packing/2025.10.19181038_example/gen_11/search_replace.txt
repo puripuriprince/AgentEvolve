@@ -1,0 +1,74 @@
+<NAME>
+smarter_outer_ring_with_local_repulsion
+</NAME>
+
+<DESCRIPTION>
+The current arrangement uses a regular 11-point outer ring with hard clipping to avoid corners and edges, but this produces some crowding and inefficient use of space especially near square boundaries. Instead, I'll use a 12-point outer ring, offset so that points avoid direct alignment with corners and edge-centers, and I'll add a short local repulsion step (only for the outer ring points) to "relax" them away from each other and from square borders, improving coverage and spacing. This is inspired by the best-known hybrid approaches and the local-optimization insights from the literature. The core constructor and radii computation are unchanged, except that the outer ring placement is smarter and more adaptive.
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+    # Place 6 in a "hex" ring around the center (radius ~0.26)
+    for i in range(6):
+        angle = 2 * np.pi * i / 6
+        r = 0.26
+        centers[9 + i] = [0.5 + r * np.cos(angle), 0.5 + r * np.sin(angle)]
+
+    # Place 11 in a slightly larger ring (radius ~0.46) -- distributed unevenly to bias away from corners/edges
+    outer_angles = np.linspace(0, 2 * np.pi, 12)[:-1] + np.pi / 12
+    for i in range(11):
+        r = 0.46
+        x = 0.5 + r * np.cos(outer_angles[i])
+        y = 0.5 + r * np.sin(outer_angles[i])
+        centers[15 + i] = [np.clip(x, 0.12, 0.88), np.clip(y, 0.12, 0.88)]
+
+    # Compute maximum valid radii for this configuration
+    radii = compute_max_radii(centers)
+    return centers, radii
+=======
+    # Place 6 in a "hex" ring around the center (radius ~0.26)
+    for i in range(6):
+        angle = 2 * np.pi * i / 6
+        r = 0.26
+        centers[9 + i] = [0.5 + r * np.cos(angle), 0.5 + r * np.sin(angle)]
+
+    # Place 12 in a larger ring (radius ~0.425), with an angular offset to avoid grid alignment
+    outer_ring_n = 12
+    outer_ring_r = 0.425
+    outer_offset = np.pi / outer_ring_n  # 15 deg offset
+    for i in range(outer_ring_n):
+        angle = 2 * np.pi * i / outer_ring_n + outer_offset
+        x = 0.5 + outer_ring_r * np.cos(angle)
+        y = 0.5 + outer_ring_r * np.sin(angle)
+        centers[15 + i] = [x, y]
+
+    # Local repulsion step for outer ring points only (indices 15..26)
+    outer_idx = np.arange(15, 27)
+    for repulse_iter in range(8):
+        for i in outer_idx:
+            dxy = np.zeros(2)
+            for j in outer_idx:
+                if i == j:
+                    continue
+                delta = centers[i] - centers[j]
+                dist = np.linalg.norm(delta)
+                if dist < 1e-8:
+                    dxy += np.random.randn(2) * 1e-3
+                elif dist < 0.13:
+                    dxy += delta / (dist + 1e-5) * 0.014
+                elif dist < 0.22:
+                    dxy += delta / dist * 0.003
+            # Bias to stay in the square (gentle)
+            for d in range(2):
+                if centers[i][d] < 0.019: dxy[d] += 0.013
+                if centers[i][d] > 0.981: dxy[d] -= 0.013
+            centers[i] += dxy
+        # Clamp outer ring to square
+        centers[outer_idx] = np.clip(centers[outer_idx], 0.018, 0.982)
+
+    # Compute maximum valid radii for this configuration
+    radii = compute_max_radii(centers)
+    return centers, radii
+>>>>>>> REPLACE
+
+</DIFF>

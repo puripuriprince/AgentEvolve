@@ -1,0 +1,300 @@
+[2025-10-19 18:10:38,318][shinka.core.runner][INFO] - Experiment configuration saved to results/shinka_circle_packing/2025.10.19181038_example/experiment_config.yaml
+[2025-10-19 18:10:38,318][shinka.core.runner][INFO] - Starting evolution with 1 parallel jobs, target: 20 generations
+[2025-10-19 18:10:38,318][shinka.core.runner][INFO] - Running generation 0 sequentially to initialize database...
+[2025-10-19 18:10:49,317][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+[2025-10-19 18:10:49,372][shinka.database.dbase][INFO] - Program 5f1491e2-efce-4e9b-8f59-6524b525ae83 added to DB - score: 0.9597642169962064.
+[2025-10-19 18:10:49,372][shinka.database.dbase][INFO] - New best program: 5f1491e2-efce-4e9b-8f59-6524b525ae83 (gen: 0, score: 0.9598, initialized island: 0).
+[2025-10-19 18:10:49,372][shinka.database.dbase][INFO] - Not enough programs with embeddings (1) to perform clustering. Need at least 4.
+[2025-10-19 18:10:49,375][shinka.database.dbase][INFO] - Creating copies of initial program 5f1491e2-efce-4e9b-8f59-6524b525ae83 for all islands
+[2025-10-19 18:10:49,376][shinka.database.islands][INFO] - Created copy 4fcfd638... of program 5f1491e2... for island 1
+[2025-10-19 18:10:49,376][shinka.database.islands][INFO] - Created 1 copies of program 5f1491e2... for islands 1-1
+[2025-10-19 18:10:49,376][shinka.database.dbase][INFO] - Database state committed. Last iteration: 0. Best: 5f1491e2-efce-4e9b-8f59-6524b525ae83
+[2025-10-19 18:10:49,379][shinka.core.summarizer][INFO] - Added program 5f1491e2-efce-4e9b-8f59-6524b525ae83 to meta memory tracking (correct=True, total: 1)
+[2025-10-19 18:10:49,382][shinka.core.summarizer][INFO] - Saved meta state to results/shinka_circle_packing/2025.10.19181038_example/meta_memory.json: 1 unprocessed programs, summary: No, scratchpad: No, recommendations: No, history: 0 items
+[2025-10-19 18:10:49,382][shinka.core.runner][INFO] - Completed generation 0, total: 1/20
+[2025-10-19 18:10:49,382][shinka.core.runner][INFO] - Starting parallel execution for remaining generations...
+[2025-10-19 18:10:49,383][shinka.database.parents][INFO] - Island 1 => Correct program scores: [0.9597642169962064]
+[2025-10-19 18:10:49,383][shinka.database.parents][INFO] - Power law probs: [1.0]
+[2025-10-19 18:10:49,383][shinka.database.parents][INFO] - Exploration: Sampled from all correct: 4fcfd638-f9cd-4179-a3ae-f1a23e75e21f (Gen: 0, Score: 0.9598, Island: 1)
+[2025-10-19 18:11:16,328][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+[2025-10-19 18:11:16,812][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+[2025-10-19 18:11:16,816][shinka.core.novelty_judge][INFO] - Top-5 similarity scores: ['0.88']
+[2025-10-19 18:11:16,816][shinka.core.novelty_judge][INFO] - NOVELTY CHECK 1/3: Accepting program due to low similarity (0.883 <= 1.0)
+[2025-10-19 18:11:18,842][shinka.database.dbase][INFO] - Program f59bc2c1-52e3-458d-ba59-3de4721e3917 added to DB - score: 1.0134795063418947.
+[2025-10-19 18:11:18,843][shinka.database.dbase][INFO] - New best program: f59bc2c1-52e3-458d-ba59-3de4721e3917 (gen: 0 → 1, score: 0.9598 → 1.0135, island: 0 → 1)
+[2025-10-19 18:11:18,843][shinka.database.dbase][INFO] - Not enough programs with embeddings (3) to perform clustering. Need at least 4.
+[2025-10-19 18:11:18,846][shinka.core.summarizer][INFO] - Added program f59bc2c1-52e3-458d-ba59-3de4721e3917 to meta memory tracking (correct=True, total: 2)
+[2025-10-19 18:11:18,847][shinka.database.dbase][INFO] - Database state committed. Last iteration: 1. Best: f59bc2c1-52e3-458d-ba59-3de4721e3917
+[2025-10-19 18:11:18,857][shinka.core.summarizer][INFO] - Saved meta state to results/shinka_circle_packing/2025.10.19181038_example/meta_memory.json: 2 unprocessed programs, summary: No, scratchpad: No, recommendations: No, history: 0 items
+[2025-10-19 18:11:18,859][shinka.database.parents][INFO] - Island 0 => Correct program scores: [0.9597642169962064]
+[2025-10-19 18:11:18,859][shinka.database.parents][INFO] - Power law probs: [1.0]
+[2025-10-19 18:11:18,859][shinka.database.parents][INFO] - Exploration: Sampled from all correct: 5f1491e2-efce-4e9b-8f59-6524b525ae83 (Gen: 0, Score: 0.9598, Island: 0)
+[2025-10-19 18:11:49,235][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+[2025-10-19 18:11:51,106][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+[2025-10-19 18:11:51,111][shinka.core.novelty_judge][INFO] - Top-5 similarity scores: ['0.81']
+[2025-10-19 18:11:51,112][shinka.core.novelty_judge][INFO] - NOVELTY CHECK 1/3: Accepting program due to low similarity (0.813 <= 1.0)
+[2025-10-19 18:11:53,146][shinka.database.dbase][INFO] - Program 386b1bf0-6796-4b64-80aa-de2858cec821 added to DB - score: 0.0.
+[2025-10-19 18:11:53,147][shinka.database.dbase][INFO] - Recomputing PCA-reduced embedding features for 4 programs.
+[2025-10-19 18:12:18,099][shinka.database.dbase][INFO] - Successfully updated embedding features for 4 programs.
+[2025-10-19 18:12:18,102][shinka.core.summarizer][INFO] - Added program 386b1bf0-6796-4b64-80aa-de2858cec821 to meta memory tracking (correct=False, total: 3)
+[2025-10-19 18:12:18,102][shinka.database.dbase][INFO] - Database state committed. Last iteration: 2. Best: f59bc2c1-52e3-458d-ba59-3de4721e3917
+[2025-10-19 18:12:18,109][shinka.core.summarizer][INFO] - Saved meta state to results/shinka_circle_packing/2025.10.19181038_example/meta_memory.json: 3 unprocessed programs, summary: No, scratchpad: No, recommendations: No, history: 0 items
+[2025-10-19 18:12:18,111][shinka.database.parents][INFO] - Island 1 => Correct program scores: [1.0134795063418947, 0.9597642169962064]
+[2025-10-19 18:12:18,111][shinka.database.parents][INFO] - Power law probs: [0.6666666666666666, 0.3333333333333333]
+[2025-10-19 18:12:18,111][shinka.database.parents][INFO] - Exploration: Sampled from all correct: f59bc2c1-52e3-458d-ba59-3de4721e3917 (Gen: 1, Score: 1.0135, Island: 1)
+[2025-10-19 18:12:18,112][shinka.database.inspirations][INFO] - Sampled 1 archive inspirations: ['4fcfd638-f9cd-4179-a3ae-f1a23e75e21f (Gen: 0, Score: 0.9598, Island: 1)']
+[2025-10-19 18:12:36,668][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+[2025-10-19 18:12:38,114][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+[2025-10-19 18:12:38,126][shinka.core.novelty_judge][INFO] - Top-5 similarity scores: ['0.99', '0.88']
+[2025-10-19 18:12:38,126][shinka.core.novelty_judge][INFO] - NOVELTY CHECK 1/3: Accepting program due to low similarity (0.987 <= 1.0)
+[2025-10-19 18:12:40,162][shinka.database.dbase][INFO] - Program 24dc3b28-52f9-49e3-ad7f-b589a091621e added to DB - score: 1.293351368013781.
+[2025-10-19 18:12:40,163][shinka.database.dbase][INFO] - New best program: 24dc3b28-52f9-49e3-ad7f-b589a091621e (gen: 1 → 3, score: 1.0135 → 1.2934, island: 1 → 1)
+[2025-10-19 18:12:40,165][shinka.database.dbase][INFO] - Recomputing PCA-reduced embedding features for 5 programs.
+[2025-10-19 18:12:41,008][shinka.database.dbase][INFO] - Successfully updated embedding features for 5 programs.
+[2025-10-19 18:12:41,011][shinka.core.summarizer][INFO] - Added program 24dc3b28-52f9-49e3-ad7f-b589a091621e to meta memory tracking (correct=True, total: 4)
+[2025-10-19 18:12:41,011][shinka.database.dbase][INFO] - Database state committed. Last iteration: 3. Best: 24dc3b28-52f9-49e3-ad7f-b589a091621e
+[2025-10-19 18:12:41,022][shinka.core.summarizer][INFO] - Saved meta state to results/shinka_circle_packing/2025.10.19181038_example/meta_memory.json: 4 unprocessed programs, summary: No, scratchpad: No, recommendations: No, history: 0 items
+[2025-10-19 18:12:41,025][shinka.database.parents][INFO] - Island 1 => Correct program scores: [1.293351368013781, 1.0134795063418947, 0.9597642169962064]
+[2025-10-19 18:12:41,025][shinka.database.parents][INFO] - Power law probs: [0.5454545454545455, 0.27272727272727276, 0.18181818181818182]
+[2025-10-19 18:12:41,025][shinka.database.parents][INFO] - Exploration: Sampled from all correct: f59bc2c1-52e3-458d-ba59-3de4721e3917 (Gen: 1, Score: 1.0135, Island: 1)
+[2025-10-19 18:12:41,026][shinka.database.inspirations][INFO] - Sampled 2 archive inspirations: ['24dc3b28-52f9-49e3-ad7f-b589a091621e (Gen: 3, Score: 1.2934, Island: 1)', '4fcfd638-f9cd-4179-a3ae-f1a23e75e21f (Gen: 0, Score: 0.9598, Island: 1)']
+[2025-10-19 18:12:52,033][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+[2025-10-19 18:12:52,236][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+[2025-10-19 18:12:52,247][shinka.core.novelty_judge][INFO] - Top-5 similarity scores: ['1.00', '0.99', '0.88']
+[2025-10-19 18:12:52,247][shinka.core.novelty_judge][INFO] - NOVELTY CHECK 1/3: Accepting program due to low similarity (1.000 <= 1.0)
+[2025-10-19 18:12:54,288][shinka.database.dbase][INFO] - Program 22109176-0240-4548-9117-42c751042de1 added to DB - score: 1.293351368013781.
+[2025-10-19 18:12:54,290][shinka.database.dbase][INFO] - Recomputing PCA-reduced embedding features for 6 programs.
+[2025-10-19 18:12:55,054][shinka.database.dbase][INFO] - Successfully updated embedding features for 6 programs.
+[2025-10-19 18:12:55,056][shinka.core.summarizer][INFO] - Added program 22109176-0240-4548-9117-42c751042de1 to meta memory tracking (correct=True, total: 5)
+[2025-10-19 18:12:55,056][shinka.database.dbase][INFO] - Database state committed. Last iteration: 4. Best: 24dc3b28-52f9-49e3-ad7f-b589a091621e
+[2025-10-19 18:12:55,065][shinka.core.summarizer][INFO] - Saved meta state to results/shinka_circle_packing/2025.10.19181038_example/meta_memory.json: 5 unprocessed programs, summary: No, scratchpad: No, recommendations: No, history: 0 items
+[2025-10-19 18:12:55,068][shinka.database.parents][INFO] - Island 1 => Correct program scores: [1.293351368013781, 1.293351368013781, 1.0134795063418947, 0.9597642169962064]
+[2025-10-19 18:12:55,068][shinka.database.parents][INFO] - Power law probs: [0.4800000000000001, 0.24000000000000005, 0.16, 0.12000000000000002]
+[2025-10-19 18:12:55,068][shinka.database.parents][INFO] - Exploration: Sampled from all correct: 4fcfd638-f9cd-4179-a3ae-f1a23e75e21f (Gen: 0, Score: 0.9598, Island: 1)
+[2025-10-19 18:12:55,069][shinka.database.inspirations][INFO] - Sampled 3 archive inspirations: ['24dc3b28-52f9-49e3-ad7f-b589a091621e (Gen: 3, Score: 1.2934, Island: 1)', '22109176-0240-4548-9117-42c751042de1 (Gen: 4, Score: 1.2934, Island: 1)', 'f59bc2c1-52e3-458d-ba59-3de4721e3917 (Gen: 1, Score: 1.0135, Island: 1)']
+[2025-10-19 18:13:23,708][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+[2025-10-19 18:13:24,083][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+[2025-10-19 18:13:24,089][shinka.core.novelty_judge][INFO] - Top-5 similarity scores: ['0.88', '0.88', '0.88', '0.88']
+[2025-10-19 18:13:24,089][shinka.core.novelty_judge][INFO] - NOVELTY CHECK 1/3: Accepting program due to low similarity (0.885 <= 1.0)
+[2025-10-19 18:13:26,123][shinka.database.dbase][INFO] - Program 69bb58da-b217-4785-8e7b-3db188742957 added to DB - score: 1.5707921811253864.
+[2025-10-19 18:13:26,124][shinka.database.dbase][INFO] - New best program: 69bb58da-b217-4785-8e7b-3db188742957 (gen: 3 → 5, score: 1.2934 → 1.5708, island: 1 → 1)
+[2025-10-19 18:13:26,125][shinka.database.dbase][INFO] - Recomputing PCA-reduced embedding features for 7 programs.
+[2025-10-19 18:13:26,903][shinka.database.dbase][INFO] - Successfully updated embedding features for 7 programs.
+[2025-10-19 18:13:26,905][shinka.core.summarizer][INFO] - Added program 69bb58da-b217-4785-8e7b-3db188742957 to meta memory tracking (correct=True, total: 6)
+[2025-10-19 18:13:26,905][shinka.database.dbase][INFO] - Database state committed. Last iteration: 5. Best: 69bb58da-b217-4785-8e7b-3db188742957
+[2025-10-19 18:13:26,920][shinka.core.summarizer][INFO] - Saved meta state to results/shinka_circle_packing/2025.10.19181038_example/meta_memory.json: 6 unprocessed programs, summary: No, scratchpad: No, recommendations: No, history: 0 items
+[2025-10-19 18:13:26,922][shinka.database.parents][INFO] - Island 0 => Correct program scores: [0.9597642169962064]
+[2025-10-19 18:13:26,923][shinka.database.parents][INFO] - Power law probs: [1.0]
+[2025-10-19 18:13:26,923][shinka.database.parents][INFO] - Exploration: Sampled from all correct: 5f1491e2-efce-4e9b-8f59-6524b525ae83 (Gen: 0, Score: 0.9598, Island: 0)
+[2025-10-19 18:13:39,753][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+[2025-10-19 18:13:40,774][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+[2025-10-19 18:13:40,790][shinka.core.novelty_judge][INFO] - Top-5 similarity scores: ['1.00', '0.82']
+[2025-10-19 18:13:40,791][shinka.core.novelty_judge][INFO] - NOVELTY CHECK 1/3: Accepting program due to low similarity (0.999 <= 1.0)
+[2025-10-19 18:13:42,812][shinka.database.dbase][INFO] - Program e8bd8d0f-80d9-415a-aced-3db6cd3a9882 added to DB - score: 1.6549630381234925.
+[2025-10-19 18:13:42,813][shinka.database.dbase][INFO] - New best program: e8bd8d0f-80d9-415a-aced-3db6cd3a9882 (gen: 5 → 6, score: 1.5708 → 1.6550, island: 1 → 0)
+[2025-10-19 18:13:42,814][shinka.database.dbase][INFO] - Recomputing PCA-reduced embedding features for 8 programs.
+[2025-10-19 18:13:43,638][shinka.database.dbase][INFO] - Successfully updated embedding features for 8 programs.
+[2025-10-19 18:13:43,640][shinka.core.summarizer][INFO] - Added program e8bd8d0f-80d9-415a-aced-3db6cd3a9882 to meta memory tracking (correct=True, total: 7)
+[2025-10-19 18:13:43,640][shinka.database.dbase][INFO] - Database state committed. Last iteration: 6. Best: e8bd8d0f-80d9-415a-aced-3db6cd3a9882
+[2025-10-19 18:13:43,657][shinka.core.summarizer][INFO] - Saved meta state to results/shinka_circle_packing/2025.10.19181038_example/meta_memory.json: 7 unprocessed programs, summary: No, scratchpad: No, recommendations: No, history: 0 items
+[2025-10-19 18:13:43,660][shinka.database.parents][INFO] - Island 0 => Correct program scores: [1.6549630381234925, 0.9597642169962064]
+[2025-10-19 18:13:43,660][shinka.database.parents][INFO] - Power law probs: [0.6666666666666666, 0.3333333333333333]
+[2025-10-19 18:13:43,660][shinka.database.parents][INFO] - Exploration: Sampled from all correct: e8bd8d0f-80d9-415a-aced-3db6cd3a9882 (Gen: 6, Score: 1.6550, Island: 0)
+[2025-10-19 18:13:43,661][shinka.database.inspirations][INFO] - Sampled 1 archive inspirations: ['5f1491e2-efce-4e9b-8f59-6524b525ae83 (Gen: 0, Score: 0.9598, Island: 0)']
+[2025-10-19 18:14:13,173][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+[2025-10-19 18:14:13,951][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+[2025-10-19 18:14:13,970][shinka.core.novelty_judge][INFO] - Top-5 similarity scores: ['0.86', '0.84', '0.84']
+[2025-10-19 18:14:13,970][shinka.core.novelty_judge][INFO] - NOVELTY CHECK 1/3: Accepting program due to low similarity (0.865 <= 1.0)
+[2025-10-19 18:14:16,006][shinka.database.dbase][INFO] - Program 602e6849-b562-4d95-b071-8957abc7d1f3 added to DB - score: 1.7528436806288177.
+[2025-10-19 18:14:16,007][shinka.database.dbase][INFO] - New best program: 602e6849-b562-4d95-b071-8957abc7d1f3 (gen: 6 → 7, score: 1.6550 → 1.7528, island: 0 → 0)
+[2025-10-19 18:14:16,009][shinka.database.dbase][INFO] - Recomputing PCA-reduced embedding features for 9 programs.
+[2025-10-19 18:14:16,848][shinka.database.dbase][INFO] - Successfully updated embedding features for 9 programs.
+[2025-10-19 18:14:16,850][shinka.core.summarizer][INFO] - Added program 602e6849-b562-4d95-b071-8957abc7d1f3 to meta memory tracking (correct=True, total: 8)
+[2025-10-19 18:14:16,850][shinka.database.dbase][INFO] - Database state committed. Last iteration: 7. Best: 602e6849-b562-4d95-b071-8957abc7d1f3
+[2025-10-19 18:14:16,869][shinka.core.summarizer][INFO] - Saved meta state to results/shinka_circle_packing/2025.10.19181038_example/meta_memory.json: 8 unprocessed programs, summary: No, scratchpad: No, recommendations: No, history: 0 items
+[2025-10-19 18:14:16,872][shinka.database.parents][INFO] - Island 0 => Correct program scores: [1.7528436806288177, 1.6549630381234925, 0.9597642169962064]
+[2025-10-19 18:14:16,873][shinka.database.parents][INFO] - Power law probs: [0.5454545454545455, 0.27272727272727276, 0.18181818181818182]
+[2025-10-19 18:14:16,873][shinka.database.parents][INFO] - Exploration: Sampled from all correct: 602e6849-b562-4d95-b071-8957abc7d1f3 (Gen: 7, Score: 1.7528, Island: 0)
+[2025-10-19 18:14:16,874][shinka.database.inspirations][INFO] - Sampled 2 archive inspirations: ['e8bd8d0f-80d9-415a-aced-3db6cd3a9882 (Gen: 6, Score: 1.6550, Island: 0)', '5f1491e2-efce-4e9b-8f59-6524b525ae83 (Gen: 0, Score: 0.9598, Island: 0)']
+[2025-10-19 18:14:47,760][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+[2025-10-19 18:14:48,363][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+[2025-10-19 18:14:48,367][shinka.core.novelty_judge][INFO] - Top-5 similarity scores: ['0.86', '0.83', '0.81', '0.80']
+[2025-10-19 18:14:48,367][shinka.core.novelty_judge][INFO] - NOVELTY CHECK 1/3: Accepting program due to low similarity (0.861 <= 1.0)
+[2025-10-19 18:14:50,405][shinka.database.dbase][INFO] - Program dc5708f7-25cf-4244-aca6-e2fdbb339b65 added to DB - score: 1.08154284215091.
+[2025-10-19 18:14:50,409][shinka.database.dbase][INFO] - Recomputing PCA-reduced embedding features for 10 programs.
+[2025-10-19 18:14:51,256][shinka.database.dbase][INFO] - Successfully updated embedding features for 10 programs.
+[2025-10-19 18:14:51,259][shinka.core.summarizer][INFO] - Added program dc5708f7-25cf-4244-aca6-e2fdbb339b65 to meta memory tracking (correct=True, total: 9)
+[2025-10-19 18:14:51,261][shinka.database.dbase][INFO] - Database state committed. Last iteration: 8. Best: 602e6849-b562-4d95-b071-8957abc7d1f3
+[2025-10-19 18:14:51,278][shinka.core.summarizer][INFO] - Saved meta state to results/shinka_circle_packing/2025.10.19181038_example/meta_memory.json: 9 unprocessed programs, summary: No, scratchpad: No, recommendations: No, history: 0 items
+[2025-10-19 18:14:51,282][shinka.database.parents][INFO] - Island 0 => Correct program scores: [1.7528436806288177, 1.6549630381234925, 1.08154284215091, 0.9597642169962064]
+[2025-10-19 18:14:51,282][shinka.database.parents][INFO] - Power law probs: [0.4800000000000001, 0.24000000000000005, 0.16, 0.12000000000000002]
+[2025-10-19 18:14:51,282][shinka.database.parents][INFO] - Exploration: Sampled from all correct: dc5708f7-25cf-4244-aca6-e2fdbb339b65 (Gen: 8, Score: 1.0815, Island: 0)
+[2025-10-19 18:14:51,284][shinka.database.inspirations][INFO] - Sampled 3 archive inspirations: ['602e6849-b562-4d95-b071-8957abc7d1f3 (Gen: 7, Score: 1.7528, Island: 0)', 'e8bd8d0f-80d9-415a-aced-3db6cd3a9882 (Gen: 6, Score: 1.6550, Island: 0)', '5f1491e2-efce-4e9b-8f59-6524b525ae83 (Gen: 0, Score: 0.9598, Island: 0)']
+[2025-10-19 18:15:22,254][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+[2025-10-19 18:15:23,003][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+[2025-10-19 18:15:23,017][shinka.core.novelty_judge][INFO] - Top-5 similarity scores: ['1.00', '0.87', '0.84', '0.81', '0.81']
+[2025-10-19 18:15:23,017][shinka.core.novelty_judge][INFO] - NOVELTY CHECK 1/3: Accepting program due to low similarity (0.999 <= 1.0)
+[2025-10-19 18:15:25,059][shinka.database.dbase][INFO] - Program 4ec27f66-e3ba-42b9-90d3-23b071909566 added to DB - score: 1.0030434456397235.
+[2025-10-19 18:15:25,062][shinka.database.dbase][INFO] - Recomputing PCA-reduced embedding features for 11 programs.
+[2025-10-19 18:15:25,862][shinka.database.dbase][INFO] - Successfully updated embedding features for 11 programs.
+[2025-10-19 18:15:25,865][shinka.core.summarizer][INFO] - Added program 4ec27f66-e3ba-42b9-90d3-23b071909566 to meta memory tracking (correct=True, total: 10)
+[2025-10-19 18:15:25,865][shinka.database.dbase][INFO] - Database state committed. Last iteration: 9. Best: 602e6849-b562-4d95-b071-8957abc7d1f3
+[2025-10-19 18:15:25,884][shinka.core.summarizer][INFO] - Saved meta state to results/shinka_circle_packing/2025.10.19181038_example/meta_memory.json: 10 unprocessed programs, summary: No, scratchpad: No, recommendations: No, history: 0 items
+[2025-10-19 18:15:25,888][shinka.database.parents][INFO] - Island 1 => Correct program scores: [1.5707921811253864, 1.293351368013781, 1.293351368013781, 1.0134795063418947, 0.9597642169962064]
+[2025-10-19 18:15:25,888][shinka.database.parents][INFO] - Power law probs: [0.43795620437956206, 0.21897810218978103, 0.145985401459854, 0.10948905109489052, 0.08759124087591241]
+[2025-10-19 18:15:25,888][shinka.database.parents][INFO] - Exploration: Sampled from all correct: 69bb58da-b217-4785-8e7b-3db188742957 (Gen: 5, Score: 1.5708, Island: 1)
+[2025-10-19 18:15:25,890][shinka.database.inspirations][INFO] - Sampled 4 archive inspirations: ['24dc3b28-52f9-49e3-ad7f-b589a091621e (Gen: 3, Score: 1.2934, Island: 1)', '22109176-0240-4548-9117-42c751042de1 (Gen: 4, Score: 1.2934, Island: 1)', '4fcfd638-f9cd-4179-a3ae-f1a23e75e21f (Gen: 0, Score: 0.9598, Island: 1)', 'f59bc2c1-52e3-458d-ba59-3de4721e3917 (Gen: 1, Score: 1.0135, Island: 1)']
+[2025-10-19 18:15:44,886][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+[2025-10-19 18:15:45,212][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+[2025-10-19 18:15:45,224][shinka.core.novelty_judge][INFO] - Top-5 similarity scores: ['1.00', '0.88', '0.88', '0.88', '0.88']
+[2025-10-19 18:15:45,224][shinka.core.novelty_judge][INFO] - NOVELTY CHECK 1/3: Accepting program due to low similarity (0.999 <= 1.0)
+[2025-10-19 18:15:47,268][shinka.database.dbase][INFO] - Program d8a96ddf-cb0a-43ad-ad9b-5d7a7fcfdd0c added to DB - score: 1.3513802699696653.
+[2025-10-19 18:15:47,271][shinka.database.dbase][INFO] - Recomputing PCA-reduced embedding features for 12 programs.
+[2025-10-19 18:15:48,060][shinka.database.dbase][INFO] - Successfully updated embedding features for 12 programs.
+[2025-10-19 18:15:48,062][shinka.database.dbase][INFO] - Running scheduled migration operation
+[2025-10-19 18:15:48,062][shinka.database.islands][INFO] - Performing island migration at generation 10
+[2025-10-19 18:15:48,065][shinka.database.islands][INFO] - Migration complete. Migrated 2 programs.
+[2025-10-19 18:15:48,065][shinka.core.summarizer][INFO] - Added program d8a96ddf-cb0a-43ad-ad9b-5d7a7fcfdd0c to meta memory tracking (correct=True, total: 11)
+[2025-10-19 18:15:48,065][shinka.database.dbase][INFO] - Database state committed. Last iteration: 10. Best: 602e6849-b562-4d95-b071-8957abc7d1f3
+[2025-10-19 18:15:48,085][shinka.core.summarizer][INFO] - Saved meta state to results/shinka_circle_packing/2025.10.19181038_example/meta_memory.json: 11 unprocessed programs, summary: No, scratchpad: No, recommendations: No, history: 0 items
+[2025-10-19 18:15:48,090][shinka.database.parents][INFO] - Island 1 => Correct program scores: [1.6549630381234925, 1.5707921811253864, 1.3513802699696653, 1.293351368013781, 1.0134795063418947, 0.9597642169962064]
+[2025-10-19 18:15:48,090][shinka.database.parents][INFO] - Power law probs: [0.4081632653061225, 0.20408163265306126, 0.1360544217687075, 0.10204081632653063, 0.0816326530612245, 0.06802721088435375]
+[2025-10-19 18:15:48,090][shinka.database.parents][INFO] - Exploration: Sampled from all correct: e8bd8d0f-80d9-415a-aced-3db6cd3a9882 (Gen: 6, Score: 1.6550, Island: 1)
+[2025-10-19 18:15:48,092][shinka.database.inspirations][INFO] - Sampled 4 archive inspirations: ['69bb58da-b217-4785-8e7b-3db188742957 (Gen: 5, Score: 1.5708, Island: 1)', '4fcfd638-f9cd-4179-a3ae-f1a23e75e21f (Gen: 0, Score: 0.9598, Island: 1)', 'f59bc2c1-52e3-458d-ba59-3de4721e3917 (Gen: 1, Score: 1.0135, Island: 1)', '22109176-0240-4548-9117-42c751042de1 (Gen: 4, Score: 1.2934, Island: 1)']
+[2025-10-19 18:15:48,093][shinka.database.inspirations][INFO] - Selected 1 top-k inspirations from archive on island 1: ['d8a96ddf-cb0a-43ad-ad9b-5d7a7fcfdd0c (Gen: 10, Score: 1.3514, Island: 1)']
+[2025-10-19 18:16:14,288][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+[2025-10-19 18:16:14,992][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+[2025-10-19 18:16:14,997][shinka.core.novelty_judge][INFO] - Top-5 similarity scores: ['0.99', '0.99', '0.88', '0.88', '0.88']
+[2025-10-19 18:16:14,997][shinka.core.novelty_judge][INFO] - NOVELTY CHECK 1/3: Accepting program due to low similarity (0.994 <= 1.0)
+[2025-10-19 18:16:17,031][shinka.database.dbase][INFO] - Program 0a00dd2c-d3f0-4726-ae5f-a7c9ab69f5c7 added to DB - score: 0.0.
+[2025-10-19 18:16:17,034][shinka.database.dbase][INFO] - Recomputing PCA-reduced embedding features for 13 programs.
+[2025-10-19 18:16:17,834][shinka.database.dbase][INFO] - Successfully updated embedding features for 13 programs.
+[2025-10-19 18:16:17,837][shinka.core.summarizer][INFO] - Added program 0a00dd2c-d3f0-4726-ae5f-a7c9ab69f5c7 to meta memory tracking (correct=False, total: 12)
+[2025-10-19 18:16:17,837][shinka.database.dbase][INFO] - Database state committed. Last iteration: 11. Best: 602e6849-b562-4d95-b071-8957abc7d1f3
+[2025-10-19 18:16:17,859][shinka.core.summarizer][INFO] - Saved meta state to results/shinka_circle_packing/2025.10.19181038_example/meta_memory.json: 12 unprocessed programs, summary: No, scratchpad: No, recommendations: No, history: 0 items
+[2025-10-19 18:16:17,864][shinka.database.parents][INFO] - Island 0 => Correct program scores: [1.7528436806288177, 1.293351368013781, 1.08154284215091, 1.0030434456397235, 0.9597642169962064]
+[2025-10-19 18:16:17,864][shinka.database.parents][INFO] - Power law probs: [0.43795620437956206, 0.21897810218978103, 0.145985401459854, 0.10948905109489052, 0.08759124087591241]
+[2025-10-19 18:16:17,864][shinka.database.parents][INFO] - Exploration: Sampled from all correct: 24dc3b28-52f9-49e3-ad7f-b589a091621e (Gen: 3, Score: 1.2934, Island: 0)
+[2025-10-19 18:16:17,866][shinka.database.inspirations][INFO] - Sampled 4 archive inspirations: ['602e6849-b562-4d95-b071-8957abc7d1f3 (Gen: 7, Score: 1.7528, Island: 0)', 'dc5708f7-25cf-4244-aca6-e2fdbb339b65 (Gen: 8, Score: 1.0815, Island: 0)', '4ec27f66-e3ba-42b9-90d3-23b071909566 (Gen: 9, Score: 1.0030, Island: 0)', '5f1491e2-efce-4e9b-8f59-6524b525ae83 (Gen: 0, Score: 0.9598, Island: 0)']
+[2025-10-19 18:16:41,075][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+[2025-10-19 18:16:41,455][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+[2025-10-19 18:16:41,463][shinka.core.novelty_judge][INFO] - Top-5 similarity scores: ['0.96', '0.84', '0.83', '0.82', '0.81']
+[2025-10-19 18:16:41,463][shinka.core.novelty_judge][INFO] - NOVELTY CHECK 1/3: Accepting program due to low similarity (0.959 <= 1.0)
+[2025-10-19 18:16:43,501][shinka.database.dbase][INFO] - Program 3e68b220-6a69-40fe-acfb-de355070364a added to DB - score: 1.2963943585599051.
+[2025-10-19 18:16:43,504][shinka.database.dbase][INFO] - Recomputing PCA-reduced embedding features for 14 programs.
+[2025-10-19 18:16:44,305][shinka.database.dbase][INFO] - Successfully updated embedding features for 14 programs.
+[2025-10-19 18:16:44,307][shinka.core.summarizer][INFO] - Added program 3e68b220-6a69-40fe-acfb-de355070364a to meta memory tracking (correct=True, total: 13)
+[2025-10-19 18:16:44,308][shinka.database.dbase][INFO] - Database state committed. Last iteration: 12. Best: 602e6849-b562-4d95-b071-8957abc7d1f3
+[2025-10-19 18:16:44,331][shinka.core.summarizer][INFO] - Saved meta state to results/shinka_circle_packing/2025.10.19181038_example/meta_memory.json: 13 unprocessed programs, summary: No, scratchpad: No, recommendations: No, history: 0 items
+[2025-10-19 18:16:44,337][shinka.database.parents][INFO] - Island 1 => Correct program scores: [1.6549630381234925, 1.5707921811253864, 1.3513802699696653, 1.293351368013781, 1.0134795063418947, 0.9597642169962064]
+[2025-10-19 18:16:44,337][shinka.database.parents][INFO] - Power law probs: [0.4081632653061225, 0.20408163265306126, 0.1360544217687075, 0.10204081632653063, 0.0816326530612245, 0.06802721088435375]
+[2025-10-19 18:16:44,337][shinka.database.parents][INFO] - Exploration: Sampled from all correct: e8bd8d0f-80d9-415a-aced-3db6cd3a9882 (Gen: 6, Score: 1.6550, Island: 1)
+[2025-10-19 18:16:44,339][shinka.database.inspirations][INFO] - Sampled 4 archive inspirations: ['69bb58da-b217-4785-8e7b-3db188742957 (Gen: 5, Score: 1.5708, Island: 1)', 'd8a96ddf-cb0a-43ad-ad9b-5d7a7fcfdd0c (Gen: 10, Score: 1.3514, Island: 1)', '4fcfd638-f9cd-4179-a3ae-f1a23e75e21f (Gen: 0, Score: 0.9598, Island: 1)', 'f59bc2c1-52e3-458d-ba59-3de4721e3917 (Gen: 1, Score: 1.0135, Island: 1)']
+[2025-10-19 18:16:44,340][shinka.database.inspirations][INFO] - Selected 1 top-k inspirations from archive on island 1: ['22109176-0240-4548-9117-42c751042de1 (Gen: 4, Score: 1.2934, Island: 1)']
+[2025-10-19 18:16:57,488][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+[2025-10-19 18:16:57,757][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+[2025-10-19 18:16:57,827][shinka.core.novelty_judge][INFO] - Top-5 similarity scores: ['0.91', '0.91', '0.85', '0.85', '0.85']
+[2025-10-19 18:16:57,827][shinka.core.novelty_judge][INFO] - NOVELTY CHECK 1/3: Accepting program due to low similarity (0.910 <= 1.0)
+[2025-10-19 18:16:59,866][shinka.database.dbase][INFO] - Program 02a2285d-2378-425c-b101-27ce2a2ce2e5 added to DB - score: 1.6187611872937944.
+[2025-10-19 18:16:59,871][shinka.database.dbase][INFO] - Recomputing PCA-reduced embedding features for 15 programs.
+[2025-10-19 18:17:00,674][shinka.database.dbase][INFO] - Successfully updated embedding features for 15 programs.
+[2025-10-19 18:17:00,676][shinka.core.summarizer][INFO] - Added program 02a2285d-2378-425c-b101-27ce2a2ce2e5 to meta memory tracking (correct=True, total: 14)
+[2025-10-19 18:17:00,677][shinka.database.dbase][INFO] - Database state committed. Last iteration: 13. Best: 602e6849-b562-4d95-b071-8957abc7d1f3
+[2025-10-19 18:17:00,702][shinka.core.summarizer][INFO] - Saved meta state to results/shinka_circle_packing/2025.10.19181038_example/meta_memory.json: 14 unprocessed programs, summary: No, scratchpad: No, recommendations: No, history: 0 items
+[2025-10-19 18:17:00,708][shinka.database.parents][INFO] - Island 0 => Correct program scores: [1.7528436806288177, 1.2963943585599051, 1.293351368013781, 1.08154284215091, 1.0030434456397235, 0.9597642169962064]
+[2025-10-19 18:17:00,708][shinka.database.parents][INFO] - Power law probs: [0.4081632653061225, 0.20408163265306126, 0.1360544217687075, 0.10204081632653063, 0.0816326530612245, 0.06802721088435375]
+[2025-10-19 18:17:00,709][shinka.database.parents][INFO] - Exploration: Sampled from all correct: 24dc3b28-52f9-49e3-ad7f-b589a091621e (Gen: 3, Score: 1.2934, Island: 0)
+[2025-10-19 18:17:00,711][shinka.database.inspirations][INFO] - Sampled 4 archive inspirations: ['602e6849-b562-4d95-b071-8957abc7d1f3 (Gen: 7, Score: 1.7528, Island: 0)', '3e68b220-6a69-40fe-acfb-de355070364a (Gen: 12, Score: 1.2964, Island: 0)', 'dc5708f7-25cf-4244-aca6-e2fdbb339b65 (Gen: 8, Score: 1.0815, Island: 0)', '5f1491e2-efce-4e9b-8f59-6524b525ae83 (Gen: 0, Score: 0.9598, Island: 0)']
+[2025-10-19 18:17:00,711][shinka.database.inspirations][INFO] - Selected 1 top-k inspirations from archive on island 0: ['4ec27f66-e3ba-42b9-90d3-23b071909566 (Gen: 9, Score: 1.0030, Island: 0)']
+[2025-10-19 18:17:19,174][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+[2025-10-19 18:17:20,012][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+[2025-10-19 18:17:20,016][shinka.core.novelty_judge][INFO] - Top-5 similarity scores: ['0.99', '0.97', '0.88', '0.87', '0.85']
+[2025-10-19 18:17:20,016][shinka.core.novelty_judge][INFO] - NOVELTY CHECK 1/3: Accepting program due to low similarity (0.986 <= 1.0)
+[2025-10-19 18:17:22,057][shinka.database.dbase][INFO] - Program 5962234e-2b97-4f76-9ea7-f7d6fc9d0d6d added to DB - score: 1.235095356785016.
+[2025-10-19 18:17:22,061][shinka.database.dbase][INFO] - Recomputing PCA-reduced embedding features for 16 programs.
+[2025-10-19 18:17:22,860][shinka.database.dbase][INFO] - Successfully updated embedding features for 16 programs.
+[2025-10-19 18:17:22,863][shinka.core.summarizer][INFO] - Added program 5962234e-2b97-4f76-9ea7-f7d6fc9d0d6d to meta memory tracking (correct=True, total: 15)
+[2025-10-19 18:17:22,863][shinka.database.dbase][INFO] - Database state committed. Last iteration: 14. Best: 602e6849-b562-4d95-b071-8957abc7d1f3
+[2025-10-19 18:17:22,890][shinka.core.summarizer][INFO] - Saved meta state to results/shinka_circle_packing/2025.10.19181038_example/meta_memory.json: 15 unprocessed programs, summary: No, scratchpad: No, recommendations: No, history: 0 items
+[2025-10-19 18:17:22,897][shinka.database.parents][INFO] - Island 0 => Correct program scores: [1.7528436806288177, 1.2963943585599051, 1.293351368013781, 1.235095356785016, 1.08154284215091, 1.0030434456397235, 0.9597642169962064]
+[2025-10-19 18:17:22,897][shinka.database.parents][INFO] - Power law probs: [0.38567493112947665, 0.19283746556473833, 0.1285583103764922, 0.09641873278236916, 0.07713498622589533, 0.0642791551882461, 0.05509641873278237]
+[2025-10-19 18:17:22,897][shinka.database.parents][INFO] - Exploration: Sampled from all correct: 602e6849-b562-4d95-b071-8957abc7d1f3 (Gen: 7, Score: 1.7528, Island: 0)
+[2025-10-19 18:17:22,899][shinka.database.inspirations][INFO] - Sampled 4 archive inspirations: ['3e68b220-6a69-40fe-acfb-de355070364a (Gen: 12, Score: 1.2964, Island: 0)', '24dc3b28-52f9-49e3-ad7f-b589a091621e (Gen: 3, Score: 1.2934, Island: 0)', 'dc5708f7-25cf-4244-aca6-e2fdbb339b65 (Gen: 8, Score: 1.0815, Island: 0)', '5962234e-2b97-4f76-9ea7-f7d6fc9d0d6d (Gen: 14, Score: 1.2351, Island: 0)']
+[2025-10-19 18:17:22,900][shinka.database.inspirations][INFO] - Selected 2 top-k inspirations from archive on island 0: ['4ec27f66-e3ba-42b9-90d3-23b071909566 (Gen: 9, Score: 1.0030, Island: 0)', '5f1491e2-efce-4e9b-8f59-6524b525ae83 (Gen: 0, Score: 0.9598, Island: 0)']
+[2025-10-19 18:17:50,325][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+[2025-10-19 18:17:50,586][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+[2025-10-19 18:17:50,598][shinka.core.novelty_judge][INFO] - Top-5 similarity scores: ['0.92', '0.87', '0.84', '0.84', '0.84']
+[2025-10-19 18:17:50,598][shinka.core.novelty_judge][INFO] - NOVELTY CHECK 1/3: Accepting program due to low similarity (0.920 <= 1.0)
+[2025-10-19 18:17:52,645][shinka.database.dbase][INFO] - Program 199e4002-d9b1-4cdc-a71d-1eaaa6be9f4a added to DB - score: 1.298121360486207.
+[2025-10-19 18:17:52,650][shinka.database.dbase][INFO] - Recomputing PCA-reduced embedding features for 17 programs.
+[2025-10-19 18:17:53,467][shinka.database.dbase][INFO] - Successfully updated embedding features for 17 programs.
+[2025-10-19 18:17:53,470][shinka.core.summarizer][INFO] - Added program 199e4002-d9b1-4cdc-a71d-1eaaa6be9f4a to meta memory tracking (correct=True, total: 16)
+[2025-10-19 18:17:53,470][shinka.database.dbase][INFO] - Database state committed. Last iteration: 15. Best: 602e6849-b562-4d95-b071-8957abc7d1f3
+[2025-10-19 18:17:53,500][shinka.core.summarizer][INFO] - Saved meta state to results/shinka_circle_packing/2025.10.19181038_example/meta_memory.json: 16 unprocessed programs, summary: No, scratchpad: No, recommendations: No, history: 0 items
+[2025-10-19 18:17:53,508][shinka.database.parents][INFO] - Island 1 => Correct program scores: [1.6549630381234925, 1.6187611872937944, 1.5707921811253864, 1.3513802699696653, 1.293351368013781, 1.0134795063418947, 0.9597642169962064]
+[2025-10-19 18:17:53,508][shinka.database.parents][INFO] - Power law probs: [0.38567493112947665, 0.19283746556473833, 0.1285583103764922, 0.09641873278236916, 0.07713498622589533, 0.0642791551882461, 0.05509641873278237]
+[2025-10-19 18:17:53,508][shinka.database.parents][INFO] - Exploration: Sampled from all correct: e8bd8d0f-80d9-415a-aced-3db6cd3a9882 (Gen: 6, Score: 1.6550, Island: 1)
+[2025-10-19 18:17:53,510][shinka.database.inspirations][INFO] - Sampled 4 archive inspirations: ['02a2285d-2378-425c-b101-27ce2a2ce2e5 (Gen: 13, Score: 1.6188, Island: 1)', 'f59bc2c1-52e3-458d-ba59-3de4721e3917 (Gen: 1, Score: 1.0135, Island: 1)', '69bb58da-b217-4785-8e7b-3db188742957 (Gen: 5, Score: 1.5708, Island: 1)', '4fcfd638-f9cd-4179-a3ae-f1a23e75e21f (Gen: 0, Score: 0.9598, Island: 1)']
+[2025-10-19 18:17:53,510][shinka.database.inspirations][INFO] - Selected 2 top-k inspirations from archive on island 1: ['d8a96ddf-cb0a-43ad-ad9b-5d7a7fcfdd0c (Gen: 10, Score: 1.3514, Island: 1)', '22109176-0240-4548-9117-42c751042de1 (Gen: 4, Score: 1.2934, Island: 1)']
+[2025-10-19 18:18:14,697][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+[2025-10-19 18:18:14,998][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+[2025-10-19 18:18:15,005][shinka.core.novelty_judge][INFO] - Top-5 similarity scores: ['0.90', '0.90', '0.90', '0.90', '0.88']
+[2025-10-19 18:18:15,005][shinka.core.novelty_judge][INFO] - NOVELTY CHECK 1/3: Accepting program due to low similarity (0.905 <= 1.0)
+[2025-10-19 18:18:17,039][shinka.database.dbase][INFO] - Program 462cb4ad-306a-4780-b7b5-9cd5da2ec1b5 added to DB - score: 1.0630680270148274.
+[2025-10-19 18:18:17,043][shinka.database.dbase][INFO] - Recomputing PCA-reduced embedding features for 18 programs.
+[2025-10-19 18:18:17,841][shinka.database.dbase][INFO] - Successfully updated embedding features for 18 programs.
+[2025-10-19 18:18:17,844][shinka.core.summarizer][INFO] - Added program 462cb4ad-306a-4780-b7b5-9cd5da2ec1b5 to meta memory tracking (correct=True, total: 17)
+[2025-10-19 18:18:17,844][shinka.database.dbase][INFO] - Database state committed. Last iteration: 16. Best: 602e6849-b562-4d95-b071-8957abc7d1f3
+[2025-10-19 18:18:17,875][shinka.core.summarizer][INFO] - Saved meta state to results/shinka_circle_packing/2025.10.19181038_example/meta_memory.json: 17 unprocessed programs, summary: No, scratchpad: No, recommendations: No, history: 0 items
+[2025-10-19 18:18:17,883][shinka.database.parents][INFO] - Island 1 => Correct program scores: [1.6549630381234925, 1.6187611872937944, 1.5707921811253864, 1.3513802699696653, 1.293351368013781, 1.0630680270148274, 1.0134795063418947, 0.9597642169962064]
+[2025-10-19 18:18:17,883][shinka.database.parents][INFO] - Power law probs: [0.3679369250985546, 0.1839684625492773, 0.12264564169951818, 0.09198423127463864, 0.07358738501971092, 0.06132282084975909, 0.05256241787122208, 0.04599211563731932]
+[2025-10-19 18:18:17,883][shinka.database.parents][INFO] - Exploration: Sampled from all correct: d8a96ddf-cb0a-43ad-ad9b-5d7a7fcfdd0c (Gen: 10, Score: 1.3514, Island: 1)
+[2025-10-19 18:18:17,885][shinka.database.inspirations][INFO] - Sampled 4 archive inspirations: ['e8bd8d0f-80d9-415a-aced-3db6cd3a9882 (Gen: 6, Score: 1.6550, Island: 1)', '02a2285d-2378-425c-b101-27ce2a2ce2e5 (Gen: 13, Score: 1.6188, Island: 1)', 'f59bc2c1-52e3-458d-ba59-3de4721e3917 (Gen: 1, Score: 1.0135, Island: 1)', '4fcfd638-f9cd-4179-a3ae-f1a23e75e21f (Gen: 0, Score: 0.9598, Island: 1)']
+[2025-10-19 18:18:17,885][shinka.database.inspirations][INFO] - Selected 2 top-k inspirations from archive on island 1: ['69bb58da-b217-4785-8e7b-3db188742957 (Gen: 5, Score: 1.5708, Island: 1)', '22109176-0240-4548-9117-42c751042de1 (Gen: 4, Score: 1.2934, Island: 1)']
+[2025-10-19 18:18:34,663][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+[2025-10-19 18:18:34,973][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+[2025-10-19 18:18:35,027][shinka.core.novelty_judge][INFO] - Top-5 similarity scores: ['1.00', '1.00', '0.89', '0.89', '0.88']
+[2025-10-19 18:18:35,027][shinka.core.novelty_judge][INFO] - NOVELTY CHECK 1/3: Accepting program due to low similarity (1.000 <= 1.0)
+[2025-10-19 18:18:37,063][shinka.database.dbase][INFO] - Program 8b948c65-08ad-4275-9ea4-cda479683160 added to DB - score: 1.3721700693419332.
+[2025-10-19 18:18:37,067][shinka.database.dbase][INFO] - Recomputing PCA-reduced embedding features for 19 programs.
+[2025-10-19 18:18:37,893][shinka.database.dbase][INFO] - Successfully updated embedding features for 19 programs.
+[2025-10-19 18:18:37,895][shinka.core.summarizer][INFO] - Added program 8b948c65-08ad-4275-9ea4-cda479683160 to meta memory tracking (correct=True, total: 18)
+[2025-10-19 18:18:37,896][shinka.database.dbase][INFO] - Database state committed. Last iteration: 17. Best: 602e6849-b562-4d95-b071-8957abc7d1f3
+[2025-10-19 18:18:37,929][shinka.core.summarizer][INFO] - Saved meta state to results/shinka_circle_packing/2025.10.19181038_example/meta_memory.json: 18 unprocessed programs, summary: No, scratchpad: No, recommendations: No, history: 0 items
+[2025-10-19 18:18:37,937][shinka.database.parents][INFO] - Island 0 => Archived program scores: [1.7528436806288177, 1.298121360486207, 1.2963943585599051, 1.293351368013781, 1.235095356785016, 1.08154284215091, 1.0030434456397235, 0.9597642169962064]
+[2025-10-19 18:18:37,937][shinka.database.parents][INFO] - Power law probs: [0.3679369250985546, 0.1839684625492773, 0.12264564169951818, 0.09198423127463864, 0.07358738501971092, 0.06132282084975909, 0.05256241787122208, 0.04599211563731932]
+[2025-10-19 18:18:37,938][shinka.database.parents][INFO] - Exploitation: Sampled from archive: 602e6849-b562-4d95-b071-8957abc7d1f3 (Gen: 7, Score: 1.7528, Island: 0)
+[2025-10-19 18:18:37,940][shinka.database.inspirations][INFO] - Sampled 4 archive inspirations: ['199e4002-d9b1-4cdc-a71d-1eaaa6be9f4a (Gen: 15, Score: 1.2981, Island: 0)', '3e68b220-6a69-40fe-acfb-de355070364a (Gen: 12, Score: 1.2964, Island: 0)', '5962234e-2b97-4f76-9ea7-f7d6fc9d0d6d (Gen: 14, Score: 1.2351, Island: 0)', '5f1491e2-efce-4e9b-8f59-6524b525ae83 (Gen: 0, Score: 0.9598, Island: 0)']
+[2025-10-19 18:18:37,940][shinka.database.inspirations][INFO] - Selected 2 top-k inspirations from archive on island 0: ['24dc3b28-52f9-49e3-ad7f-b589a091621e (Gen: 3, Score: 1.2934, Island: 0)', 'dc5708f7-25cf-4244-aca6-e2fdbb339b65 (Gen: 8, Score: 1.0815, Island: 0)']
+[2025-10-19 18:19:02,834][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+[2025-10-19 18:19:03,155][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+[2025-10-19 18:19:03,229][shinka.core.novelty_judge][INFO] - Top-5 similarity scores: ['0.99', '0.88', '0.88', '0.88', '0.87']
+[2025-10-19 18:19:03,229][shinka.core.novelty_judge][INFO] - NOVELTY CHECK 1/3: Accepting program due to low similarity (0.993 <= 1.0)
+[2025-10-19 18:19:05,269][shinka.database.dbase][INFO] - Program 695cc9c3-8d85-4c94-b61f-23eb1b1c0138 added to DB - score: 1.5614812779162413.
+[2025-10-19 18:19:05,273][shinka.database.dbase][INFO] - Recomputing PCA-reduced embedding features for 20 programs.
+[2025-10-19 18:19:06,079][shinka.database.dbase][INFO] - Successfully updated embedding features for 20 programs.
+[2025-10-19 18:19:06,082][shinka.core.summarizer][INFO] - Added program 695cc9c3-8d85-4c94-b61f-23eb1b1c0138 to meta memory tracking (correct=True, total: 19)
+[2025-10-19 18:19:06,082][shinka.database.dbase][INFO] - Database state committed. Last iteration: 18. Best: 602e6849-b562-4d95-b071-8957abc7d1f3
+[2025-10-19 18:19:06,117][shinka.core.summarizer][INFO] - Saved meta state to results/shinka_circle_packing/2025.10.19181038_example/meta_memory.json: 19 unprocessed programs, summary: No, scratchpad: No, recommendations: No, history: 0 items
+[2025-10-19 18:19:06,127][shinka.database.parents][INFO] - Island 0 => Archived program scores: [1.7528436806288177, 1.5614812779162413, 1.298121360486207, 1.2963943585599051, 1.293351368013781, 1.235095356785016, 1.08154284215091, 1.0030434456397235, 0.9597642169962064]
+[2025-10-19 18:19:06,127][shinka.database.parents][INFO] - Power law probs: [0.3534857623790153, 0.17674288118950765, 0.11782858745967177, 0.08837144059475383, 0.07069715247580306, 0.058914293729835886, 0.05049796605414504, 0.04418572029737691, 0.03927619581989059]
+[2025-10-19 18:19:06,127][shinka.database.parents][INFO] - Exploitation: Sampled from archive: 3e68b220-6a69-40fe-acfb-de355070364a (Gen: 12, Score: 1.2964, Island: 0)
+[2025-10-19 18:19:06,130][shinka.database.inspirations][INFO] - Sampled 4 archive inspirations: ['602e6849-b562-4d95-b071-8957abc7d1f3 (Gen: 7, Score: 1.7528, Island: 0)', '695cc9c3-8d85-4c94-b61f-23eb1b1c0138 (Gen: 18, Score: 1.5615, Island: 0)', '199e4002-d9b1-4cdc-a71d-1eaaa6be9f4a (Gen: 15, Score: 1.2981, Island: 0)', '5f1491e2-efce-4e9b-8f59-6524b525ae83 (Gen: 0, Score: 0.9598, Island: 0)']
+[2025-10-19 18:19:06,131][shinka.database.inspirations][INFO] - Selected 2 top-k inspirations from archive on island 0: ['24dc3b28-52f9-49e3-ad7f-b589a091621e (Gen: 3, Score: 1.2934, Island: 0)', '5962234e-2b97-4f76-9ea7-f7d6fc9d0d6d (Gen: 14, Score: 1.2351, Island: 0)']
+[2025-10-19 18:19:22,688][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+[2025-10-19 18:19:23,916][httpx][INFO] - HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+[2025-10-19 18:19:23,970][shinka.core.novelty_judge][INFO] - Top-5 similarity scores: ['1.00', '0.97', '0.96', '0.84', '0.84']
+[2025-10-19 18:19:23,970][shinka.core.novelty_judge][INFO] - NOVELTY CHECK 1/3: Accepting program due to low similarity (0.999 <= 1.0)
+[2025-10-19 18:19:26,019][shinka.database.dbase][INFO] - Program 6e3ff5ea-5194-4968-a56d-45ebfcdc47e1 added to DB - score: 0.0.
+[2025-10-19 18:19:26,024][shinka.database.dbase][INFO] - Recomputing PCA-reduced embedding features for 21 programs.
+[2025-10-19 18:19:26,833][shinka.database.dbase][INFO] - Successfully updated embedding features for 21 programs.
+[2025-10-19 18:19:26,836][shinka.core.summarizer][INFO] - Added program 6e3ff5ea-5194-4968-a56d-45ebfcdc47e1 to meta memory tracking (correct=False, total: 20)
+[2025-10-19 18:19:26,836][shinka.database.dbase][INFO] - Database state committed. Last iteration: 19. Best: 602e6849-b562-4d95-b071-8957abc7d1f3
+[2025-10-19 18:19:26,873][shinka.core.summarizer][INFO] - Saved meta state to results/shinka_circle_packing/2025.10.19181038_example/meta_memory.json: 20 unprocessed programs, summary: No, scratchpad: No, recommendations: No, history: 0 items
+[2025-10-19 18:19:26,880][shinka.core.runner][INFO] - All generations completed, exiting...
+[2025-10-19 18:19:26,880][shinka.core.summarizer][INFO] - No meta LLM client configured, skipping final summary
+[2025-10-19 18:19:26,916][shinka.core.summarizer][INFO] - Saved meta state to results/shinka_circle_packing/2025.10.19181038_example/meta_memory.json: 20 unprocessed programs, summary: No, scratchpad: No, recommendations: No, history: 0 items
+[2025-10-19 18:19:26,935][shinka.core.runner][INFO] - Evolution completed! 20 generations
+[2025-10-19 18:19:26,935][shinka.core.runner][INFO] - ================================================================================
+[2025-10-19 18:19:26,936][shinka.core.runner][INFO] - Evolution run ended at 2025-10-19 18:19:26
+[2025-10-19 18:19:26,936][shinka.core.runner][INFO] - ================================================================================

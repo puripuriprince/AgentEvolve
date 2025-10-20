@@ -1,0 +1,111 @@
+# EVOLVE-BLOCK-START
+"""Hybrid arrangement with center-edge-corner gradient for n=26 circles"""
+
+import numpy as np
+
+def construct_packing():
+    """
+    Construct an improved arrangement of 26 circles in a unit square,
+    using a hybrid placement: big center, edge-centers, corners, 
+    inner/outer rings, and interstitials.
+
+    Returns:
+        Tuple of (centers, radii)
+        centers: np.array of shape (26, 2) with (x, y) coordinates
+        radii: np.array of shape (26) with radius of each circle
+    """
+    n = 26
+    centers = np.zeros((n, 2))
+
+    # 0: large center
+    centers[0] = [0.5, 0.5]
+    # 1-4: edge centers
+    centers[1] = [0.5, 0.05]
+    centers[2] = [0.95, 0.5]
+    centers[3] = [0.5, 0.95]
+    centers[4] = [0.05, 0.5]
+    # 5-8: corners
+    centers[5] = [0.05, 0.05]
+    centers[6] = [0.95, 0.05]
+    centers[7] = [0.95, 0.95]
+    centers[8] = [0.05, 0.95]
+    # 9-16: inner ring (radius 0.27 from center)
+    angle_offset = np.pi/8
+    for i in range(8):
+        angle = 2*np.pi*i/8 + angle_offset
+        r = 0.27
+        centers[9+i] = [0.5 + r * np.cos(angle), 0.5 + r * np.sin(angle)]
+    # 17-25: between edge-centers and corners (edge "thirds" & face diagonals)
+    # 4 on edge thirds (not at center nor corner), 5 on face diagonal midpoints (including one more central)
+    edge_third = 0.22
+    centers[17] = [0.5, edge_third]
+    centers[18] = [0.5, 1-edge_third]
+    centers[19] = [edge_third, 0.5]
+    centers[20] = [1-edge_third, 0.5]
+    # 5 interstitials: diagonals 1/4 and 3/4 between center and each corner
+    diag_1_4 = 0.25
+    diag_3_4 = 0.75
+    centers[21] = [diag_1_4, diag_1_4]
+    centers[22] = [diag_3_4, diag_1_4]
+    centers[23] = [diag_3_4, diag_3_4]
+    centers[24] = [diag_1_4, diag_3_4]
+    # 25: central vertical/horizontal cross intersection
+    centers[25] = [0.5, 0.75]
+
+    # Slightly move points inside if at the border
+    centers = np.clip(centers, 0.012, 0.988)
+
+    # Compute maximal radii
+    radii = compute_max_radii_iterative(centers)
+    return centers, radii
+
+def compute_max_radii_iterative(centers, max_iters=50, tol=1e-8):
+    """
+    Iteratively compute maximal radii so that circles don't overlap or exit the unit square.
+    Uses a pairwise min procedure and iterative tightening.
+
+    Args:
+        centers: np.array (n, 2)
+        max_iters: int, number of iterations for tightening
+        tol: convergence tolerance
+
+    Returns:
+        radii: np.array (n,)
+    """
+    n = centers.shape[0]
+    radii = np.ones(n)
+    # Border constraint
+    for i in range(n):
+        x, y = centers[i]
+        radii[i] = min(x, y, 1-x, 1-y)
+    # Iterative tightening for overlaps
+    for _ in range(max_iters):
+        prev = radii.copy()
+        for i in range(n):
+            for j in range(i+1, n):
+                dist = np.linalg.norm(centers[i]-centers[j])
+                if dist < 1e-8:
+                    # If two centers are coincident, force radii to nearly zero
+                    radii[i] = min(radii[i], 1e-4)
+                    radii[j] = min(radii[j], 1e-4)
+                elif radii[i] + radii[j] > dist:
+                    # Reduce both radii proportionally to avoid overlap
+                    excess = (radii[i] + radii[j]) - dist
+                    share = 0.5 * excess
+                    radii[i] -= share
+                    radii[j] -= share
+                    radii[i] = max(radii[i], 1e-6)
+                    radii[j] = max(radii[j], 1e-6)
+        if np.max(np.abs(radii - prev)) < tol:
+            break
+    return radii
+
+# EVOLVE-BLOCK-END
+
+# This part remains fixed (not evolved)
+def run_packing():
+    """Run the circle packing constructor for n=26"""
+    centers, radii = construct_packing()
+    # Calculate the sum of radii
+    sum_radii = np.sum(radii)
+    return centers, radii, sum_radii

@@ -1,0 +1,149 @@
+<NAME>
+adaptive_ring_grid_hybrid
+</NAME>
+
+<DESCRIPTION>
+Current arrangements use a 3x3 honeycomb plus an outer adaptive ring, but the central honeycomb grid can be sub-optimal for this n=26. Literature and high-performing packings for similar n suggest using a more flexible, denser, nearly-square adaptive grid in the central region, with a variable-radius (non-uniform) ring of circles outside it. I'll replace the honeycomb 3x3 (9) grid (positions 9–17) with a 3x4 adaptive grid (12 points), covering the central region more evenly and reducing wasted space. I will then reduce the outer ring to 6 circles, adjusting their radius outward to better fill the available space, and introducing some angular jitter and repulsion to avoid near-collision with corners and edge-centers.
+
+This hybrid approach exploits the fact that for moderately large n, the best packings often fit a high-density near-square grid in the center, with a variable, slightly "pushed-out" outer ring. This arrangement should allow for larger radii sums and better coverage.
+
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+    # 3. Build a 3x3 honeycomb grid (hex pattern) for the interior
+    # Honeycomb cell size is chosen to fit 9 circles in the interior
+    honeycomb_scale = 0.185  # Controls how far from center each cell goes
+    honeycomb_pts = []
+    for i in range(-1, 2):
+        for j in range(-1, 2):
+            # Offset alternate rows
+            x = 0.5 + honeycomb_scale * (i + 0.5 * (j % 2))
+            y = 0.5 + honeycomb_scale * np.sqrt(3)/2 * j
+            # Ensure not coincident with center
+            if abs(i) + abs(j) == 0:
+                continue
+            honeycomb_pts.append([x, y])
+    for pt in honeycomb_pts:
+        centers[idx] = pt
+        idx += 1
+
+    # 4. Place remaining circles in an adaptive outer ring (9 circles)
+    # The radius is chosen so circles are not too close to edges/corners, and are repelled if so
+    num_outer = 9
+    ring_r = 0.38
+    ring_theta = np.linspace(0, 2*np.pi, num_outer, endpoint=False)
+    for ii in range(num_outer):
+        theta = ring_theta[ii]
+        # Initial
+        x = 0.5 + ring_r * np.cos(theta)
+        y = 0.5 + ring_r * np.sin(theta)
+        # Adaptive: repel from corners and edge-centers
+        repulse = np.zeros(2)
+        for c in corners + edges:
+            vec = np.array([x, y]) - np.array(c)
+            dist = np.linalg.norm(vec)
+            if dist < 0.22:
+                repulse += (vec / (dist + 1e-10)) * (0.018 / (dist + 0.018))
+        x += repulse[0]
+        y += repulse[1]
+        # Slight jitter to break symmetry and avoid local minima
+        x += 0.009 * np.sin(ii + 0.3)
+        y += 0.009 * np.cos(ii + 0.6)
+        x = np.clip(x, 0.08, 0.92)
+        y = np.clip(y, 0.08, 0.92)
+        centers[idx] = [x, y]
+        idx += 1
+
+    assert idx == n
+
+    # 5. Local repulsion: push interior honeycomb points out if too close to corners/edges
+    interior_idx = list(range(8, 17))
+    special_idx = list(range(0,8))
+    for k in interior_idx:
+        for j in special_idx:
+            d = np.linalg.norm(centers[k] - centers[j])
+            if d < 0.21:
+                # Push away
+                push_vec = (centers[k] - centers[j])
+                if np.linalg.norm(push_vec) > 0:
+                    push_vec = push_vec / np.linalg.norm(push_vec)
+                    centers[k] += 0.012 * push_vec
+
+    # 6. Iterative max-min radii update
+    radii = maximize_radii_iterative(centers, passes=5)
+    return centers, radii
+=======
+    # 3. Place a 3x4 adaptive grid in the central region (12 circles)
+    # The grid will be slightly compressed toward the center to avoid edge crowding
+    grid_rows, grid_cols = 3, 4
+    grid_x = np.linspace(0.28, 0.72, grid_cols)
+    grid_y = np.linspace(0.28, 0.72, grid_rows)
+    grid_jitter = 0.012
+    center_pt = [0.5, 0.5]
+    grid_pts = []
+    for i, y in enumerate(grid_y):
+        for j, x in enumerate(grid_x):
+            # Small random jitter to avoid perfect alignment and promote larger radii
+            dx = grid_jitter * np.sin(i + 2.1 * j)
+            dy = grid_jitter * np.cos(j + 1.5 * i)
+            pt = [x + dx, y + dy]
+            # Avoid the precise center (already placed)
+            if np.linalg.norm(np.array(pt) - center_pt) < 0.08:
+                continue
+            grid_pts.append(pt)
+    for pt in grid_pts:
+        centers[idx] = pt
+        idx += 1
+
+    # 4. Place remaining circles (6) in an adaptive outer ring
+    num_outer = n - idx
+    ring_base_r = 0.41
+    ring_spread = 0.04
+    ring_theta = np.linspace(0, 2*np.pi, num_outer, endpoint=False)
+    for ii in range(num_outer):
+        # Vary radius so that points are not all equidistant from center
+        r = ring_base_r + ring_spread * np.sin(2 * ring_theta[ii] + ii)
+        theta = ring_theta[ii] + 0.18 * np.cos(3 * ii)
+        x = 0.5 + r * np.cos(theta)
+        y = 0.5 + r * np.sin(theta)
+        # Repulsion from corners and edge-centers
+        repulse = np.zeros(2)
+        for c in corners + edges:
+            vec = np.array([x, y]) - np.array(c)
+            dist = np.linalg.norm(vec)
+            if dist < 0.20:
+                repulse += (vec / (dist + 1e-10)) * (0.022 / (dist + 0.022))
+        x += repulse[0]
+        y += repulse[1]
+        # Angular jitter to break symmetry and avoid repeats
+        x += 0.014 * np.sin(2 * ii + 0.5)
+        y += 0.014 * np.cos(2 * ii + 0.9)
+        x = np.clip(x, 0.07, 0.93)
+        y = np.clip(y, 0.07, 0.93)
+        centers[idx] = [x, y]
+        idx += 1
+
+    assert idx == n
+
+    # 5. Local adaptive repulsion for interior grid points from corners/edges
+    # (push away if too close)
+    grid_start = 8
+    grid_end = 8 + len(grid_pts)
+    interior_idx = list(range(grid_start, grid_end))
+    special_idx = list(range(0,8))
+    for k in interior_idx:
+        for j in special_idx:
+            d = np.linalg.norm(centers[k] - centers[j])
+            if d < 0.18:
+                push_vec = (centers[k] - centers[j])
+                if np.linalg.norm(push_vec) > 0:
+                    push_vec = push_vec / np.linalg.norm(push_vec)
+                    centers[k] += 0.016 * push_vec
+
+    # 6. Iterative max-min radii update
+    radii = maximize_radii_iterative(centers, passes=6)
+    return centers, radii
+>>>>>>> REPLACE
+
+</DIFF>

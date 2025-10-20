@@ -1,0 +1,78 @@
+<NAME>
+edge_corners_priority
+</NAME>
+
+<DESCRIPTION>
+Instead of using two rings and a center, strategically place circles at the four corners and the centers of the four edges of the square, maximizing radius locally for those 8 positions. Then, fill the interior with one large center circle and the remaining 17 circles in two quasi-hexagonal layers (an inner ring of 6 and an outer ring of 11), favoring larger circles near the center and smaller near the corners/edges. This hybrid strategy leverages the square's geometry and edge effects and is common in best-known packings for n in the mid-20s. The initial placement increases possible radii for edge and corner circles, leading to a higher sum after adjusting.
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+    # Place circles in a structured pattern
+    # This is a simple pattern - evolution will improve this
+
+    # First, place a large circle in the center
+    centers[0] = [0.5, 0.5]
+
+    # Place 8 circles around it in a ring
+    for i in range(8):
+        angle = 2 * np.pi * i / 8
+        centers[i + 1] = [0.5 + 0.3 * np.cos(angle), 0.5 + 0.3 * np.sin(angle)]
+
+    # Place 16 more circles in an outer ring
+    for i in range(16):
+        angle = 2 * np.pi * i / 16
+        centers[i + 9] = [0.5 + 0.7 * np.cos(angle), 0.5 + 0.7 * np.sin(angle)]
+
+    # Additional positioning adjustment to make sure all circles
+    # are inside the square and don't overlap
+    # Clip to ensure everything is inside the unit square
+    centers = np.clip(centers, 0.01, 0.99)
+
+    # Compute maximum valid radii for this configuration
+    radii = compute_max_radii(centers)
+    return centers, radii
+=======
+    # Place 4 circles at the corners
+    corner_pos = [
+        [0.01, 0.01],
+        [0.99, 0.01],
+        [0.99, 0.99],
+        [0.01, 0.99]
+    ]
+    for i in range(4):
+        centers[i] = corner_pos[i]
+
+    # Place 4 circles at the edge centers
+    edge_centers = [
+        [0.5, 0.01],
+        [0.99, 0.5],
+        [0.5, 0.99],
+        [0.01, 0.5]
+    ]
+    for i in range(4):
+        centers[4 + i] = edge_centers[i]
+
+    # Place 1 large at the center
+    centers[8] = [0.5, 0.5]
+
+    # Place 6 in a "hex" ring around the center (radius ~0.26)
+    for i in range(6):
+        angle = 2 * np.pi * i / 6
+        r = 0.26
+        centers[9 + i] = [0.5 + r * np.cos(angle), 0.5 + r * np.sin(angle)]
+
+    # Place 11 in a slightly larger ring (radius ~0.46) -- distributed unevenly to bias away from corners/edges
+    outer_angles = np.linspace(0, 2 * np.pi, 12)[:-1] + np.pi / 12
+    for i in range(11):
+        r = 0.46
+        x = 0.5 + r * np.cos(outer_angles[i])
+        y = 0.5 + r * np.sin(outer_angles[i])
+        centers[15 + i] = [np.clip(x, 0.12, 0.88), np.clip(y, 0.12, 0.88)]
+
+    # Compute maximum valid radii for this configuration
+    radii = compute_max_radii(centers)
+    return centers, radii
+>>>>>>> REPLACE
+
+</DIFF>

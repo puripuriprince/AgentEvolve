@@ -1,0 +1,136 @@
+# EVOLVE-BLOCK-START
+"""Hierarchical honeycomb with privileged edge/corner and adaptive repulsion for 26-circle packing."""
+
+import numpy as np
+
+def construct_packing():
+    """
+    Construct an arrangement of 26 circles in a unit square maximizing the sum of radii.
+    Returns:
+        centers: np.array of shape (26, 2)
+        radii: np.array of shape (26,)
+    """
+    n = 26
+    centers = np.zeros((n, 2))
+    idx = 0
+
+    # 1. Place 4 corners and 4 edge centers — these will be larger
+    margin = 0.016
+    edge_margin = 0.032
+    corners = [
+        [margin, margin],
+        [1 - margin, margin],
+        [1 - margin, 1 - margin],
+        [margin, 1 - margin]
+    ]
+    for c in corners:
+        centers[idx] = c
+        idx += 1
+    edges = [
+        [0.5, edge_margin],
+        [1 - edge_margin, 0.5],
+        [0.5, 1 - edge_margin],
+        [edge_margin, 0.5]
+    ]
+    for c in edges:
+        centers[idx] = c
+        idx += 1
+
+    # 2. Place a central circle
+    centers[idx] = [0.5, 0.5]
+    idx += 1
+
+    # 3. Build a 3x3 honeycomb grid (hex pattern) for the interior
+    # Honeycomb cell size is chosen to fit 9 circles in the interior
+    honeycomb_scale = 0.185  # Controls how far from center each cell goes
+    honeycomb_pts = []
+    for i in range(-1, 2):
+        for j in range(-1, 2):
+            # Offset alternate rows
+            x = 0.5 + honeycomb_scale * (i + 0.5 * (j % 2))
+            y = 0.5 + honeycomb_scale * np.sqrt(3)/2 * j
+            # Ensure not coincident with center
+            if abs(i) + abs(j) == 0:
+                continue
+            honeycomb_pts.append([x, y])
+    for pt in honeycomb_pts:
+        centers[idx] = pt
+        idx += 1
+
+    # 4. Place remaining circles in an adaptive outer ring (9 circles)
+    # The radius is chosen so circles are not too close to edges/corners, and are repelled if so
+    num_outer = 9
+    ring_r = 0.38
+    ring_theta = np.linspace(0, 2*np.pi, num_outer, endpoint=False)
+    for ii in range(num_outer):
+        theta = ring_theta[ii]
+        # Initial
+        x = 0.5 + ring_r * np.cos(theta)
+        y = 0.5 + ring_r * np.sin(theta)
+        # Adaptive: repel from corners and edge-centers
+        repulse = np.zeros(2)
+        for c in corners + edges:
+            vec = np.array([x, y]) - np.array(c)
+            dist = np.linalg.norm(vec)
+            if dist < 0.22:
+                repulse += (vec / (dist + 1e-10)) * (0.018 / (dist + 0.018))
+        x += repulse[0]
+        y += repulse[1]
+        # Slight jitter to break symmetry and avoid local minima
+        x += 0.009 * np.sin(ii + 0.3)
+        y += 0.009 * np.cos(ii + 0.6)
+        x = np.clip(x, 0.08, 0.92)
+        y = np.clip(y, 0.08, 0.92)
+        centers[idx] = [x, y]
+        idx += 1
+
+    assert idx == n
+
+    # 5. Local repulsion: push interior honeycomb points out if too close to corners/edges
+    interior_idx = list(range(8, 17))
+    special_idx = list(range(0,8))
+    for k in interior_idx:
+        for j in special_idx:
+            d = np.linalg.norm(centers[k] - centers[j])
+            if d < 0.21:
+                # Push away
+                push_vec = (centers[k] - centers[j])
+                if np.linalg.norm(push_vec) > 0:
+                    push_vec = push_vec / np.linalg.norm(push_vec)
+                    centers[k] += 0.012 * push_vec
+
+    # 6. Iterative max-min radii update
+    radii = maximize_radii_iterative(centers, passes=5)
+    return centers, radii
+
+def maximize_radii_iterative(centers, passes=5):
+    """
+    Iteratively maximize each circle's radius given others' positions and radii.
+    Each pass, maximize for each circle in turn.
+    """
+    n = centers.shape[0]
+    radii = np.ones(n)
+    # Initial: border-limited
+    for i in range(n):
+        x, y = centers[i]
+        radii[i] = min(x, y, 1 - x, 1 - y)
+    for _ in range(passes):
+        for i in range(n):
+            # For each other circle, the distance minus its radius is a limit
+            min_r = min(centers[i][0], centers[i][1], 1 - centers[i][0], 1 - centers[i][1])
+            for j in range(n):
+                if i == j: continue
+                d = np.linalg.norm(centers[i] - centers[j])
+                min_r = min(min_r, d - radii[j])
+            radii[i] = max(min_r, 0)
+    return radii
+
+# EVOLVE-BLOCK-END
+
+# This part remains fixed (not evolved)
+def run_packing():
+    """Run the circle packing constructor for n=26"""
+    centers, radii = construct_packing()
+    # Calculate the sum of radii
+    sum_radii = np.sum(radii)
+    return centers, radii, sum_radii

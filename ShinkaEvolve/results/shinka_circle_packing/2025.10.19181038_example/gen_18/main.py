@@ -1,0 +1,169 @@
+# EVOLVE-BLOCK-START
+"""Layered adaptive grid for improved 26-circle packing in a unit square."""
+
+import numpy as np
+
+def construct_packing():
+    """
+    Construct an arrangement of 26 circles in a unit square
+    maximizing the sum of their radii, using a hybrid central-priority scheme:
+      - One large central circle
+      - 4 corners, 4 edge-centers (total 8 at perimeter), all slightly inset
+      - 2x2 jittered grid around center (excluding center itself, 4 points)
+      - 12-point adaptive outer ring (hexagonal/elliptical, with jitter)
+      - One interstitial circle along a diagonal
+    Returns:
+        Tuple of (centers, radii)
+        centers: np.array of shape (26, 2) with (x, y) coordinates
+        radii: np.array of shape (26) with radius of each circle
+    """
+    n = 26
+    centers = np.zeros((n, 2))
+    idx = 0
+
+    # 1. Central circle
+    centers[idx] = [0.5, 0.5]
+    idx += 1
+
+    # 2. Corners (4) and edge centers (4), slightly inset
+    corner_eps = 0.018
+    corners = [
+        [corner_eps, corner_eps],
+        [1 - corner_eps, corner_eps],
+        [1 - corner_eps, 1 - corner_eps],
+        [corner_eps, 1 - corner_eps]
+    ]
+    for c in corners:
+        centers[idx] = c
+        idx += 1
+    edge_eps = 0.034
+    edge_centers = [
+        [0.5, edge_eps],
+        [1 - edge_eps, 0.5],
+        [0.5, 1 - edge_eps],
+        [edge_eps, 0.5]
+    ]
+    for c in edge_centers:
+        centers[idx] = c
+        idx += 1
+
+    # 3. 2x2 jittered grid near the center (excluding [0.5, 0.5])
+    grid_N = 2
+    grid_lo = 0.33
+    grid_hi = 0.67
+    grid_pts = np.linspace(grid_lo, grid_hi, grid_N)
+    for i in range(grid_N):
+        for j in range(grid_N):
+            # Skip center point
+            if abs(grid_pts[i] - 0.5) < 1e-6 and abs(grid_pts[j] - 0.5) < 1e-6:
+                continue
+            # Slight jitter to break symmetry
+            dx = 0.01 * np.sin(i + 2.4*j)
+            dy = 0.01 * np.cos(j + 1.7*i)
+            pt = [grid_pts[i] + dx, grid_pts[j] + dy]
+            centers[idx] = pt
+            idx += 1
+
+    # 4. 12-point adaptive outer ring (hexagonal/elliptical, jittered)
+    # This fills space between the edge-centers/corners and allows more flexibility
+    outer_N = 12
+    outer_a = 0.44
+    outer_b = 0.405
+    for i in range(outer_N):
+        theta = 2 * np.pi * i / outer_N + 0.1 * np.sin(1.9*i)
+        r = outer_a * outer_b / np.sqrt((outer_b * np.cos(theta))**2 + (outer_a * np.sin(theta))**2)
+        # Local radius modulation
+        r *= 1.0 + 0.019 * np.sin(2 * theta + 2.1 * i)
+        x = 0.5 + r * np.cos(theta)
+        y = 0.5 + r * np.sin(theta)
+        # Repel from corners and edge-centers
+        for cpt in corners + edge_centers:
+            vec = np.array([x, y]) - np.array(cpt)
+            dist = np.linalg.norm(vec)
+            if dist < 0.15:
+                f = 0.012 * (0.15-dist)/0.15
+                x += vec[0] * f
+                y += vec[1] * f
+        # Angular jitter to break symmetry
+        x += 0.007 * np.sin(2 * i + 1.3)
+        y += 0.007 * np.cos(2 * i + 2.1)
+        x = np.clip(x, 0.014, 0.986)
+        y = np.clip(y, 0.014, 0.986)
+        centers[idx] = [x, y]
+        idx += 1
+
+    # 5. One interstitial circle along a diagonal (between center and top-right corner)
+    diag_frac = 0.74
+    pt = [0.5 + diag_frac*(1-corner_eps-0.5), 0.5 + diag_frac*(1-corner_eps-0.5)]
+    pt[0] += 0.003
+    pt[1] += 0.002
+    centers[idx] = pt
+    idx += 1
+
+    assert idx == n
+
+    # Compute maximum valid radii for this configuration
+    radii = compute_max_radii_greedy(centers)
+    return centers, radii
+
+
+def compute_max_radii_greedy(centers, passes=3):
+    """
+    Compute the maximum possible radii for each circle position
+    using a greedy pass with repeated overlap resolution.
+
+    Args:
+        centers: np.array of shape (n, 2) with (x, y) coordinates
+        passes: how many times to sweep through all pairs to resolve conflicts
+
+    Returns:
+        np.array of shape (n) with radius of each circle
+    """
+    n = centers.shape[0]
+    radii = np.ones(n)
+
+    # Initial: limit by distance to borders
+    for i in range(n):
+        x, y = centers[i]
+        radii[i] = min(x, y, 1 - x, 1 - y)
+
+    # Iteratively resolve pairwise overlaps (greedy, a few passes)
+    for _ in range(passes):
+        for i in range(n):
+            for j in range(i + 1, n):
+                d = np.linalg.norm(centers[i] - centers[j])
+                if radii[i] + radii[j] > d:
+                    # Shrink both proportionally so sum = d
+                    if d > 1e-12:
+                        scale = d / (radii[i] + radii[j])
+                        radii[i] *= scale
+                        radii[j] *= scale
+                    else:
+                        # Coincident centers: set both radii to zero
+                        radii[i] = 0
+                        radii[j] = 0
+
+    # Final: local radius boost (try to maximize each circle individually)
+    for i in range(n):
+        # Find min distance to border
+        x, y = centers[i]
+        border = min(x, y, 1 - x, 1 - y)
+        # Find min distance to any other center minus that circle's radius
+        min_dist = border
+        for j in range(n):
+            if i == j: continue
+            d = np.linalg.norm(centers[i] - centers[j]) - radii[j]
+            min_dist = min(min_dist, d)
+        radii[i] = max(0, min_dist)
+    return radii
+
+# EVOLVE-BLOCK-END
+
+
+# This part remains fixed (not evolved)
+def run_packing():
+    """Run the circle packing constructor for n=26"""
+    centers, radii = construct_packing()
+    # Calculate the sum of radii
+    sum_radii = np.sum(radii)
+    return centers, radii, sum_radii

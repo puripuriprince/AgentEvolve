@@ -1,0 +1,168 @@
+<NAME>
+hex_dodec_gradient_full_edge_corner
+</NAME>
+
+<DESCRIPTION>
+The current approach omits three corners and two edge centers, which are typically favorable locations for larger circles due to available space. Instead, I propose a structure inspired by successful prior arrangements:
+- Keep the layered symmetry (central, hex, dodecagon rings) but *fully* populate all four corners and four edge centers, as this usually increases the sum of radii for modest n.
+- Slightly contract the dodecagon ring to r=0.395 to avoid excessive crowding with the newly added edge/corner circles.
+- Remove the third "octagon" ring (which crowds the square's periphery) and instead use those 8 slots for 4 corners and 4 edge centers, placing them inset for larger radii.
+- Slightly increase the first and second ring radii to better utilize central square space.
+- Adjust local repulsion to allow slightly larger minimum distances for better edge/corner expansion.
+
+This change is a hybrid of the best previously performing patterns and should yield a higher combined score.
+
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+    n = 26
+    centers = np.zeros((n, 2))
+
+    # Layer assignment:
+    # 0: Center
+    # 1-6: First ring (hexagon, 6)
+    # 7-14: Second ring (octagon, 8)
+    # 15-22: Third ring (octagon, 8)
+    # 23-24: Edge centers (2)
+    # 25: One corner (1)  (remaining corners omitted for less crowding)
+
+    # --- Central circle ---
+    centers[0] = [0.5, 0.5]
+
+    # --- First ring (hexagon, radius r1) ---
+    r1 = 0.185
+    for i in range(6):
+        angle = 2*np.pi*i/6 + np.pi/12
+        centers[1+i] = [0.5 + r1*np.cos(angle), 0.5 + r1*np.sin(angle)]
+
+    # --- Second ring (octagon, radius r2, angular offset) ---
+    r2 = 0.295
+    for i in range(8):
+        angle = 2*np.pi*i/8
+        centers[7+i] = [0.5 + r2*np.cos(angle), 0.5 + r2*np.sin(angle)]
+
+    # --- Third ring (octagon, radius r3, staggered offset) ---
+    r3 = 0.41
+    angle_offset3 = np.pi/8
+    for i in range(8):
+        angle = 2*np.pi*i/8 + angle_offset3
+        centers[15+i] = [0.5 + r3*np.cos(angle), 0.5 + r3*np.sin(angle)]
+
+    # --- Edge-centers (inset for larger radii) ---
+    edge_inset = 0.08
+    centers[23] = [0.5, edge_inset]
+    centers[24] = [0.5, 1-edge_inset]
+
+    # --- Single corner (most favorable) ---
+    corner_inset = 0.07
+    centers[25] = [corner_inset, corner_inset]
+
+    # --- Local repulsion refinement (mini-optimization) ---
+    # Only nudge outer two rings, edge, and corner circles, not the center or first ring (structural backbone)
+    movable = np.array([False]*7 + [True]*8 + [True]*8 + [True]*2 + [True])
+    repulse_iters = 18
+    repulse_eps = 1e-3
+    for _ in range(repulse_iters):
+        for i in range(n):
+            if not movable[i]:
+                continue
+            dxy = np.zeros(2)
+            for j in range(n):
+                if i == j:
+                    continue
+                delta = centers[i] - centers[j]
+                dist = np.linalg.norm(delta)
+                if dist < 1e-8:
+                    dxy += np.random.randn(2)*1e-3
+                elif dist < 0.06:
+                    # Strong repulsion for near-coincident
+                    dxy += delta / (dist+1e-6) * 0.016
+                elif dist < 0.16:
+                    # Moderate repulsion
+                    dxy += delta / dist * 0.007
+            # Bias to stay in the square
+            for d in range(2):
+                if centers[i][d] < 0.012:
+                    dxy[d] += 0.014
+                if centers[i][d] > 0.988:
+                    dxy[d] -= 0.014
+            centers[i] += dxy
+        # Clamp to square (with inset)
+        centers = np.clip(centers, 0.012, 0.988)
+=======
+    n = 26
+    centers = np.zeros((n, 2))
+
+    # Structure:
+    # 0: Center
+    # 1-6: First ring (hexagon, 6)
+    # 7-18: Second ring (dodecagon, 12)
+    # 19-22: Edge centers (4, inset)
+    # 23-26: Corners (4, inset)
+
+    # --- Central circle ---
+    centers[0] = [0.5, 0.5]
+
+    # --- First ring (hexagon, radius r1) ---
+    r1 = 0.205
+    for i in range(6):
+        angle = 2*np.pi*i/6 + np.pi/15
+        centers[1+i] = [0.5 + r1*np.cos(angle), 0.5 + r1*np.sin(angle)]
+
+    # --- Second ring (dodecagon, radius r2) ---
+    r2 = 0.395
+    dodec_offset = np.pi/12
+    for i in range(12):
+        angle = 2*np.pi*i/12 + dodec_offset
+        centers[7+i] = [0.5 + r2*np.cos(angle), 0.5 + r2*np.sin(angle)]
+
+    # --- Edge-centers (inset for larger radii) ---
+    edge_inset = 0.061
+    centers[19] = [0.5, edge_inset]
+    centers[20] = [1-edge_inset, 0.5]
+    centers[21] = [0.5, 1-edge_inset]
+    centers[22] = [edge_inset, 0.5]
+
+    # --- Corners (inset for larger radii) ---
+    corner_inset = 0.058
+    centers[23] = [corner_inset, corner_inset]
+    centers[24] = [1-corner_inset, corner_inset]
+    centers[25] = [1-corner_inset, 1-corner_inset]
+    centers[26-1] = [corner_inset, 1-corner_inset]
+
+    # --- Local repulsion refinement (mini-optimization) ---
+    # Only nudge dodecagon, edge, and corner circles, not the center or first ring (structural backbone)
+    movable = np.array([False]*7 + [True]*12 + [True]*4 + [True]*4)
+    repulse_iters = 12
+    repulse_eps = 1e-3
+    for _ in range(repulse_iters):
+        for i in range(n):
+            if not movable[i]:
+                continue
+            dxy = np.zeros(2)
+            for j in range(n):
+                if i == j:
+                    continue
+                delta = centers[i] - centers[j]
+                dist = np.linalg.norm(delta)
+                if dist < 1e-8:
+                    dxy += np.random.randn(2)*1e-3
+                elif dist < 0.067:
+                    # Strong repulsion for near-coincident
+                    dxy += delta / (dist+1e-6) * 0.017
+                elif dist < 0.17:
+                    # Moderate repulsion
+                    dxy += delta / dist * 0.0075
+            # Bias to stay in the square
+            for d in range(2):
+                if centers[i][d] < 0.012:
+                    dxy[d] += 0.012
+                if centers[i][d] > 0.988:
+                    dxy[d] -= 0.012
+            centers[i] += dxy
+        # Clamp to square (with inset)
+        centers = np.clip(centers, 0.012, 0.988)
+>>>>>>> REPLACE
+
+</DIFF>

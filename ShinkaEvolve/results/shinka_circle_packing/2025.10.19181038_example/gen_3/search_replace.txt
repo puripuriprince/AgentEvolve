@@ -1,0 +1,118 @@
+<NAME>
+outer_ring_hexagonal
+</NAME>
+
+<DESCRIPTION>
+Inspired by the hybrid methods in the literature, I propose to slightly adjust the outer/interstitial placement. Specifically, I will use a more hexagonal-like outer ring for 12 of the circles, placing them at a radius of about 0.41 from the center (fitting just inside the unit square), and use some of the remaining circles for strategic edge and corner placements. This should improve packing density by mimicking the denser arrangement near the edges and corners, while keeping a large central disk and interstitials. The hexagonal ring "absorbs" more circles efficiently than the previous 8-point inner ring, reducing wasted space at the boundary. I will update the arrangement accordingly.
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+def construct_packing():
+    """
+    Construct an improved arrangement of 26 circles in a unit square,
+    using a hybrid placement: big center, edge-centers, corners,
+    inner/outer rings, and interstitials.
+
+    Returns:
+        Tuple of (centers, radii)
+        centers: np.array of shape (26, 2) with (x, y) coordinates
+        radii: np.array of shape (26) with radius of each circle
+    """
+    n = 26
+    centers = np.zeros((n, 2))
+
+    # 0: large center
+    centers[0] = [0.5, 0.5]
+    # 1-4: edge centers
+    centers[1] = [0.5, 0.05]
+    centers[2] = [0.95, 0.5]
+    centers[3] = [0.5, 0.95]
+    centers[4] = [0.05, 0.5]
+    # 5-8: corners
+    centers[5] = [0.05, 0.05]
+    centers[6] = [0.95, 0.05]
+    centers[7] = [0.95, 0.95]
+    centers[8] = [0.05, 0.95]
+    # 9-16: inner ring (radius 0.27 from center)
+    angle_offset = np.pi/8
+    for i in range(8):
+        angle = 2*np.pi*i/8 + angle_offset
+        r = 0.27
+        centers[9+i] = [0.5 + r * np.cos(angle), 0.5 + r * np.sin(angle)]
+    # 17-25: between edge-centers and corners (edge "thirds" & face diagonals)
+    # 4 on edge thirds (not at center nor corner), 5 on face diagonal midpoints (including one more central)
+    edge_third = 0.22
+    centers[17] = [0.5, edge_third]
+    centers[18] = [0.5, 1-edge_third]
+    centers[19] = [edge_third, 0.5]
+    centers[20] = [1-edge_third, 0.5]
+    # 5 interstitials: diagonals 1/4 and 3/4 between center and each corner
+    diag_1_4 = 0.25
+    diag_3_4 = 0.75
+    centers[21] = [diag_1_4, diag_1_4]
+    centers[22] = [diag_3_4, diag_1_4]
+    centers[23] = [diag_3_4, diag_3_4]
+    centers[24] = [diag_1_4, diag_3_4]
+    # 25: central vertical/horizontal cross intersection
+    centers[25] = [0.5, 0.75]
+
+    # Slightly move points inside if at the border
+    centers = np.clip(centers, 0.012, 0.988)
+
+    # Compute maximal radii
+    radii = compute_max_radii_iterative(centers)
+    return centers, radii
+=======
+def construct_packing():
+    """
+    Construct a refined arrangement of 26 circles in a unit square,
+    now with a large center, a 12-point hexagonal outer ring,
+    strategic edge/corner/interstitial placements for the rest.
+
+    Returns:
+        Tuple of (centers, radii)
+        centers: np.array of shape (26, 2) with (x, y) coordinates
+        radii: np.array of shape (26) with radius of each circle
+    """
+    n = 26
+    centers = np.zeros((n, 2))
+
+    # 0: large center
+    centers[0] = [0.5, 0.5]
+    # 1-4: edge centers (midpoints of edges)
+    centers[1] = [0.5, 0.06]
+    centers[2] = [0.94, 0.5]
+    centers[3] = [0.5, 0.94]
+    centers[4] = [0.06, 0.5]
+    # 5-8: corners
+    centers[5] = [0.06, 0.06]
+    centers[6] = [0.94, 0.06]
+    centers[7] = [0.94, 0.94]
+    centers[8] = [0.06, 0.94]
+
+    # 9-20: 12-point "outer" hexagonal ring (radius ~0.41)
+    ring_r = 0.41
+    ring_offset = np.pi/12
+    for i in range(12):
+        angle = 2 * np.pi * i / 12 + ring_offset
+        centers[9 + i] = [0.5 + ring_r * np.cos(angle), 0.5 + ring_r * np.sin(angle)]
+    # 21-24: four face-diagonal interstitials, at 1/4,3/4 between center and corners
+    diag_1_4 = 0.5 + 0.25 * (np.array([[-1, -1], [1, -1], [1, 1], [-1, 1]]))
+    diag_3_4 = 0.5 + 0.75 * (np.array([[-1, -1], [1, -1], [1, 1], [-1, 1]]))
+    centers[21] = diag_1_4[0]
+    centers[22] = diag_1_4[2]
+    centers[23] = diag_3_4[1]
+    centers[24] = diag_3_4[3]
+    # 25: edge-interstitial (center of top edge)
+    centers[25] = [0.5, 0.79]
+
+    # Slightly move points inside if at the border
+    centers = np.clip(centers, 0.013, 0.987)
+
+    # Compute maximal radii
+    radii = compute_max_radii_iterative(centers)
+    return centers, radii
+>>>>>>> REPLACE
+
+</DIFF>
