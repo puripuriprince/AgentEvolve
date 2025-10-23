@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agent-evolve"
+version = "0.1.0"
+description = "User-friendly wrapper for Shinka evolution engine"
+requires-python = ">=3.10"
+dependencies = [
+    "gradio>=4.0.0",
+    "anthropic>=0.25.0",
+    "openai>=1.0.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+]
+
+[tool.setuptools]
+packages = ["core", "ui"]

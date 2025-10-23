@@ -6,3 +6,6 @@
 # Exclude evaluation run results
 ShinkaEvolve/results/
 */results/
+
+mcp-tools/
+embed-based/

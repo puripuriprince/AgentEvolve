@@ -1,0 +1,13 @@
+README.md
+pyproject.toml
+agent_evolve.egg-info/PKG-INFO
+agent_evolve.egg-info/SOURCES.txt
+agent_evolve.egg-info/dependency_links.txt
+agent_evolve.egg-info/requires.txt
+agent_evolve.egg-info/top_level.txt
+core/__init__.py
+core/agent.py
+core/evaluator.py
+core/templates.py
+ui/__init__.py
+ui/app.py
